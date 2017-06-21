@@ -69,13 +69,13 @@ datafile = struct(  'numberOfChannels',128,...
                     'bufferStart',0,...
                     'bufferEnd',0,...
                     'buffer',[],... % 128*#datapoints
-                    'loadStart',25000,... % if center of window is smaller than this
-                    'loadEnd',75000,... % if center of window is larger than this
+                    'loadStart',2500,... % if center of window is smaller than this
+                    'loadEnd',7500,... % if center of window is larger than this
                     'bufferSize',-1,... % the size of the buffer
-                    'maxBufferSize',100000,... % in datapoints
+                    'maxBufferSize',10000,... % in datapoints
                     'dataWindow',[0,0],...
                     'windowSize',-1,...
-                    'maxWindowSize',20000,... % has to be smaller than maxBufferSize/4
+                    'maxWindowSize',2000,... % has to be smaller than maxBufferSize/4
                     'fileReader',-1,...
                     'newBufferStart',-1,...
                     'newBufferEnd',-1,...
@@ -135,6 +135,9 @@ function window = checkDataWindow(datafile,window)
     if size < 0
         error("newDataWindow.size cannot be negative");
     end
+    center = floor((window(1) + window(2))/2)
+    window(1) = center - ceil(size/2);
+    window(2) = center + floor(size/2);
     if window(1) < 0
         window(1) = 0;
         window(2) = size;
@@ -180,8 +183,8 @@ function window = checkDataWindow(datafile,window)
         plot(x,datafile.buffer(:,i));
         hold on;
     end
-    datafile.beginBuffer = beginBuffer;
-    datafile.endBuffer = endBuffer;
+    datafile.bufferStart = beginBuffer;
+    datafile.bufferEnd = endBuffer;
     
 function datafile = updateWindow(handles,newWindow)
         datafile = handles.datafile;
@@ -214,14 +217,14 @@ function scrollHandler(hObject, eventdata, handles)
             ySize = YLim(2) - YLim(1);
             center = (YLim(1)+YLim(2))/2;
             if ~handles.modifiers.ctrl
-                if eventdata.VerticalScrollCount > 0 
+                if eventdata.VerticalScrollCount < 0 
                     YLim = YLim + ySize/20;
                 else
                     YLim = YLim - ySize/20;
                 end
             else 
                 if eventdata.VerticalScrollCount > 0 
-                    ySize = ySize*1.05;
+                    ySize = ySize + max([ySize*0.05,10]);
                 else
                    ySize = ySize*0.95;
                 end
@@ -240,7 +243,7 @@ function scrollHandler(hObject, eventdata, handles)
             else
                 center = floor((window(1) + window(2))/2);
                 if eventdata.VerticalScrollCount > 0 
-                    handles.datafile.windowSize = floor(handles.datafile.windowSize*1.05);
+                    handles.datafile.windowSize = floor(handles.datafile.windowSize + max([5,handles.datafile.windowSize*0.05]));
                 else
                     handles.datafile.windowSize = floor(handles.datafile.windowSize*0.95);
                 end
