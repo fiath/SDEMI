@@ -71,7 +71,8 @@ datafile = struct(  'numberOfChannels',128,...
                     'loadEnd',300000,... % if center of window is larger than this
                     'bufferSize',-1,... % the size of the buffer
                     'maxBufferSize',400000,... % in datapoints
-                    'dataWindow',[0,20000],...
+                    'dataWindow',[0,0],...
+                    'windowSize',-1,...
                     'maxWindowSize',50000,... % has to be smaller than maxBufferSize/4
                     'fileReader',-1,...
                     'newBufferStart',-1,...
@@ -81,61 +82,10 @@ datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
 datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
 datafile.file = memmapfile(dataFile, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
 handles.datafile = datafile;
-%handles.datafile = changeDataWindow(handles.datafile,[220000,250000]);
+handles.datafile = updateWindow(handles.datafile,[0,20000]);
 
 % Update handles structure
 guidata(hObject, handles);
-
-function buffer = readData(datafile)
-    file = fopen(datafile.file,'r');
-    %file = datafile.file;
-    fseek(file,datafile.newBufferStart*datafile.resolution*...
-                                datafile.numberOfChannels,'bof');
-    buffer = fread(file,[datafile.numberOfChannels,datafile.bufferSize],'int16');
-    fclose(file);
-  
-% function f = parfeval(~,fun,nout,in1)
-%     f = struct('output',fun(in1));
-%     
-% function [id,out] = fetchNext(f,varargin)
-%     id = 1;
-%     out = f.output;
-
-% has to be called with datafile.fileReader == -1
-function datafile = updateBufferForWindow(datafile)
-    % the center of the window relative to the buffer
-    center = (datafile.dataWindow(1) + datafile.dataWindow(2))/2 - datafile.bufferStart;
-    if datafile.bufferEnd ~= 0
-        % we already have a valid buffer
-        if center > datafile.loadStart && center < datafile.loadEnd
-            % we don't have to update the buffer
-            return
-        end
-        if center <= datafile.loadStart && datafile.bufferStart == 0
-            % we have no data before
-            return
-        end
-        if center >= datafile.loadEnd && datafile.bufferEnd == datafile.length
-            % we have no data after
-            return
-        end
-    end
-    % center the buffer at center
-    global_center = (datafile.dataWindow(1) + datafile.dataWindow(2))/2;
-    beginBuffer = max(0,global_center - floor(datafile.bufferSize/2));
-    endBuffer = min(datafile.length,global_center + ceil(datafile.bufferSize/2));
-    if beginBuffer == 0
-        endBuffer = datafile.bufferSize;
-    end
-    if endBuffer == datafile.length
-        beginBuffer = datafile.length - datafile.bufferSize;
-    end
-    p = gcp();
-    datafile.newBufferStart = beginBuffer;
-    datafile.newBufferEnd = beginBuffer + datafile.bufferSize;
-    fprintf('Started read at [%d,%d]\n',datafile.newBufferStart,datafile.newBufferEnd);
-    datafile.fileReader = parfeval(p,@readData,1,datafile);
-    datafile = changeDataWindow(datafile,datafile.dataWindow);
 
 function mousemoveHandler(hObject, eventdata, handles)
 
@@ -152,54 +102,15 @@ function window = checkDataWindow(datafile,window)
         window(2) = datafile.length-1;
         window(1) = window(2) - size;
     end
-   
-function datafile = changeDataWindow(datafile,newDataWindow)
-    datafile.dataWindow = checkDataWindow(datafile,newDataWindow);
-    return
-    if datafile.fileReader == -1
-        % we don't have bg fetching
-        datafile = updateBufferForWindow(datafile);
-    else
-        % check if bg fetch finished
-        [id,buffer] = fetchNext(datafile.fileReader,0);
-        if size(id,1) == 1
-            fprintf('Finished read at [%d,%d]\n',datafile.newBufferStart,datafile.newBufferEnd);
-            datafile.fileReader = -1;
-            datafile.buffer = buffer;
-            datafile.bufferStart = datafile.newBufferStart;
-            datafile.bufferEnd = datafile.newBufferEnd;
-            datafile = changeDataWindow(datafile,datafile.dataWindow);
-        else
-            % bg is still running
-            % check if dataWindow is in intersection
-            if datafile.dataWindow(1) >= max(datafile.bufferStart,datafile.newBufferStart) && ...
-                    datafile.dataWindow(2) <= min(datafile.bufferEnd,datafile.newBufferEnd)
-                % window is in intersection use it
-                return
-            else
-                % window is not contained in intersection
-                if datafile.dataWindow(1) >= datafile.newBufferStart && ...
-                        datafile.dataWindow(2) <= datafile.newBufferEnd
-                    % window is contained in newBuffer
-                    % wait for it to load
-                    [id,buffer] = fetchNext(datafile.fileReader);
-                    fprintf('Finished read at [%d,%d]\n',datafile.newBufferStart,datafile.newBufferEnd);
-                    datafile.fileReader = -1;
-                    datafile.buffer = buffer;
-                    datafile.bufferStart = datafile.newBufferStart;
-                    datafile.bufferEnd = datafile.newBufferEnd;
-                    datafile = changeDataWindow(datafile,datafile.dataWindow);
-                else
-                    % window is not contained in bg result
-                    % either need to start new bg or use buffer we already
-                    % have
-                    cancel(datafile.fileReader);
-                    datafile.fileReader = -1;
-                    datafile = changeDataWindow(datafile,datafile.dataWindow);
-                end
-            end
-        end
-    end
+    
+function datafile = updateWindow(datafile,newWindow)
+        datafile.dataWindow = checkDataWindow(datafile,newWindow);
+        datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
+        startWindow = datafile.dataWindow(1);
+        endWindow = datafile.dataWindow(2);
+        fprintf('Start: %d, End: %d\n',startWindow,endWindow);
+        plot(gca,datafile.file.Data.x(65,startWindow+1:endWindow));
+        
 
 % UIWAIT makes untitled wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -212,19 +123,12 @@ function scrollHandler(hObject, eventdata, handles)
         handles = guidata(gcf);
         window = handles.datafile.dataWindow;
         if eventdata.VerticalScrollCount > 0 
-            window = window + 1000;
+            window = window + handles.datafile.windowSize/20;
         else
-            window = window - 1000;
+            window = window - handles.datafile.windowSize/20;
         end
-        handles.datafile = changeDataWindow(handles.datafile,window);
+        handles.datafile = updateWindow(handles.datafile,window);
         guidata(hObject, handles);
-        startBuff = handles.datafile.dataWindow(1);% - handles.datafile.bufferStart;
-        endBuff = handles.datafile.dataWindow(2);% - handles.datafile.bufferStart;
-        fprintf('Start: %d, End: %d\n',startBuff,endBuff);
-        %fprintf('\nPostion: %d, BuffLength: %d, WindowStart: %d, WindowEnd: %d, BuffWindowStart: %d, BuffWindowEnd: %d\n',...
-        %        handles.datafile.bufferStart,handles.datafile.bufferSize,handles.datafile.dataWindow(1),...
-        %        handles.datafile.dataWindow(2),startBuff,endBuff);
-        plot(gca,handles.datafile.file.Data.x(65,startBuff+1:endBuff));
     end
 
 
