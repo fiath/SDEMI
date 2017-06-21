@@ -146,10 +146,17 @@ function window = checkDataWindow(datafile,window)
     
 function datafile = updateWindow(handles,newWindow)
         datafile = handles.datafile;
-        datafile.dataWindow = checkDataWindow(datafile,newWindow);
-        datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
-        startWindow = datafile.dataWindow(1);
-        endWindow = datafile.dataWindow(2);
+        newWindow = checkDataWindow(datafile,newWindow);
+        if newWindow(1) < datafile.dataWindow(1)
+            endWindow = min([newWindow(2),datafile.dataWindow(1)]);
+        else
+            endWindow = newWindow(2);
+        end
+        if datafile.dataWindow(2) < newWindow(2)
+            startWindow = max([newWindow(1),datafile.dataWindow(2)]);
+        else
+            startWindow = newWindow(1);
+        end        
         fprintf('Start: %d, End: %d\n',startWindow,endWindow);
 %         axes(handles.axes1);
 %         cla
@@ -157,12 +164,15 @@ function datafile = updateWindow(handles,newWindow)
         for i=1:datafile.numberOfChannels
             datafile.buffer(:,i) = datafile.buffer(:,i) + i*1000;
         end
-        plot(handles.axes1,datafile.buffer);
+        x = linspace(startWindow,endWindow,size(datafile.buffer,1));
+        for i=1:datafile.numberOfChannels
+            plot(handles.axes1,x,datafile.buffer(:,i));
+            hold on;
+        end
         set(gca,'YLim',datafile.ylim);
-        x = datafile.dataWindow(1):(datafile.windowSize/10):datafile.dataWindow(2);
-        set(gca,'XTick',linspace(0,size(datafile.buffer,1),size(x,2)));
-        set(gca,'XTickLabel',x);
-        set(gca,'XLim',[0,datafile.windowSize]);
+        set(gca,'XLim',[newWindow(1),newWindow(2)]);
+        datafile.dataWindow = newWindow;
+        datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
 %         for i=1:2
 %            plot(gca,datafile.file.Data.x(i,startWindow+1:endWindow));
 %         end
