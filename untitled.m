@@ -69,13 +69,13 @@ datafile = struct(  'numberOfChannels',128,...
                     'bufferStart',0,...
                     'bufferEnd',0,...
                     'buffer',[],... % 128*#datapoints
-                    'loadStart',100000,... % if center of window is smaller than this
-                    'loadEnd',300000,... % if center of window is larger than this
+                    'loadStart',25000,... % if center of window is smaller than this
+                    'loadEnd',75000,... % if center of window is larger than this
                     'bufferSize',-1,... % the size of the buffer
-                    'maxBufferSize',400000,... % in datapoints
+                    'maxBufferSize',100000,... % in datapoints
                     'dataWindow',[0,0],...
                     'windowSize',-1,...
-                    'maxWindowSize',50000,... % has to be smaller than maxBufferSize/4
+                    'maxWindowSize',20000,... % has to be smaller than maxBufferSize/4
                     'fileReader',-1,...
                     'newBufferStart',-1,...
                     'newBufferEnd',-1,...
@@ -144,31 +144,54 @@ function window = checkDataWindow(datafile,window)
         window(1) = window(2) - size;
     end
     
+ function datafile = updateBuffer(datafile,newWindow)
+    center = floor((newWindow(1) + newWindow(2))/2 - datafile.bufferStart);
+    if datafile.bufferEnd ~= 0
+        % we already have a valid buffer
+        if center > datafile.loadStart && center < datafile.loadEnd
+            % we don't have to update the buffer
+            return
+        end
+        if center <= datafile.loadStart && datafile.bufferStart == 0
+            % we have no data before
+            return
+        end
+        if center >= datafile.loadEnd && datafile.bufferEnd == datafile.length
+            % we have no data after
+            return
+        end
+    end
+    % center the buffer at center
+    global_center = floor((newWindow(1) + newWindow(2))/2);
+    beginBuffer = max(0,global_center - floor(datafile.bufferSize/2));
+    endBuffer = min(datafile.length,global_center + ceil(datafile.bufferSize/2));
+    if beginBuffer == 0
+        endBuffer = datafile.bufferSize;
+    end
+    if endBuffer == datafile.length
+        beginBuffer = datafile.length - datafile.bufferSize;
+    end
+    datafile.buffer = 0.195*int32(datafile.file.Data.x(:,beginBuffer+1:endBuffer))';
+    for i=1:datafile.numberOfChannels
+        datafile.buffer(:,i) = datafile.buffer(:,i) + i*1000;
+    end
+    x = linspace(beginBuffer,endBuffer,size(datafile.buffer,1));
+    for i=1:datafile.numberOfChannels
+        plot(x,datafile.buffer(:,i));
+        hold on;
+    end
+    datafile.beginBuffer = beginBuffer;
+    datafile.endBuffer = endBuffer;
+    
 function datafile = updateWindow(handles,newWindow)
         datafile = handles.datafile;
         newWindow = checkDataWindow(datafile,newWindow);
-        if newWindow(1) < datafile.dataWindow(1)
-            endWindow = min([newWindow(2),datafile.dataWindow(1)]);
-        else
-            endWindow = newWindow(2);
-        end
-        if datafile.dataWindow(2) < newWindow(2)
-            startWindow = max([newWindow(1),datafile.dataWindow(2)]);
-        else
-            startWindow = newWindow(1);
-        end        
+        datafile = updateBuffer(datafile,newWindow);
+        startWindow = newWindow(1);      
+        endWindow = newWindow(2);
         fprintf('Start: %d, End: %d\n',startWindow,endWindow);
 %         axes(handles.axes1);
 %         cla
-        datafile.buffer = 0.195*int32(datafile.file.Data.x(:,startWindow+1:endWindow))';
-        for i=1:datafile.numberOfChannels
-            datafile.buffer(:,i) = datafile.buffer(:,i) + i*1000;
-        end
-        x = linspace(startWindow,endWindow,size(datafile.buffer,1));
-        for i=1:datafile.numberOfChannels
-            plot(handles.axes1,x,datafile.buffer(:,i));
-            hold on;
-        end
         set(gca,'YLim',datafile.ylim);
         set(gca,'XLim',[newWindow(1),newWindow(2)]);
         datafile.dataWindow = newWindow;
