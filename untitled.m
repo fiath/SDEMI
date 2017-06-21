@@ -56,6 +56,7 @@ handles.output = hObject;
 
 set(handles.figure1,'WindowButtonMotionFcn',@mousemoveHandler);
 set(handles.figure1,'WindowScrollWheelFcn',@scrollHandler);
+set(handles.figure1,'ResizeFcn',@resizeHandler);
 set(handles.figure1,'WindowKeyPressFcn',@keydownHandler);
 set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
 
@@ -66,16 +67,19 @@ datafile = struct(  'numberOfChannels',128,...
                     'samplingRate',20000,...
                     'file',-1,...
                     'length',-1,...
+                    'channelLines',[],...
+                    'activeChannels',[],...
+                    'channelIds',[],...
                     'bufferStart',0,...
                     'bufferEnd',0,...
                     'buffer',[],... % 128*#datapoints
-                    'loadStart',2500,... % if center of window is smaller than this
-                    'loadEnd',7500,... % if center of window is larger than this
+                    'loadStart',5000,... % if center of window is smaller than this
+                    'loadEnd',15000,... % if center of window is larger than this
                     'bufferSize',-1,... % the size of the buffer
-                    'maxBufferSize',10000,... % in datapoints
+                    'maxBufferSize',20000,... % in datapoints
                     'dataWindow',[0,0],...
                     'windowSize',-1,...
-                    'maxWindowSize',2000,... % has to be smaller than maxBufferSize/4
+                    'maxWindowSize',5000,... % has to be smaller than maxBufferSize/4
                     'fileReader',-1,...
                     'newBufferStart',-1,...
                     'newBufferEnd',-1,...
@@ -84,12 +88,21 @@ datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
 % the whole file is loaded at once
 datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
 datafile.file = memmapfile(dataFile, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
+datafile.channelLines = gobjects(datafile.numberOfChannels,1);
+datafile.channelIds = gobjects(datafile.numberOfChannels,1);
+%set(gca,'Units','pixels');
+for i=1:datafile.numberOfChannels
+    datafile.channelIds(i) = uicontrol('Style','text','String',num2str(i),'Position',[0,0,20,13]);
+    set(datafile.channelIds(i),'ButtonDownFcn',{@onChannelIdHandler,i},'Enable','inactive');
+    %set(datafile.channelIds(i),'Enable','inactive');
+end
 handles.datafile = datafile;
 % hold(handles.axes1,'on');
 ax = gca;
 set(ax,'YLim',handles.datafile.ylim);
 ax.Clipping = 'off';
 handles.datafile = updateWindow(handles,[0,1000]);
+updateIdPositions(handles.datafile);
 modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.modifiers = modifiers;
 
@@ -129,6 +142,8 @@ function keyupHandler(hObject, eventdata, handles)
     guidata(hObject, handles);
 
 function mousemoveHandler(hObject, eventdata, handles)
+    C = get (gca, 'CurrentPoint');
+    %fprintf('Mouse: [%d,%d]\n',C(1,1),C(1,2));
 
 function window = checkDataWindow(datafile,window)
     size = min([datafile.length,datafile.maxWindowSize,window(2) - window(1)]);
@@ -178,13 +193,57 @@ function window = checkDataWindow(datafile,window)
     for i=1:datafile.numberOfChannels
         datafile.buffer(:,i) = datafile.buffer(:,i) + i*1000;
     end
+    cla;
     x = linspace(beginBuffer,endBuffer,size(datafile.buffer,1));
     for i=1:datafile.numberOfChannels
-        plot(x,datafile.buffer(:,i));
+        datafile.channelLines(i) = plot(x,datafile.buffer(:,i),'Color','black');
+        set(datafile.channelLines(i),'ButtonDownFcn',{@onchannelclickHandler,i});
         hold on;
     end
+    set(gca,'YTickLabel',[]);
+    yticks((1:128)*1000);
+%     ax = gca;
     datafile.bufferStart = beginBuffer;
     datafile.bufferEnd = endBuffer;
+   
+ function onChannelIdHandler(object,~,id)
+     handles = guidata(gcf);
+     onchannelclickHandler(handles.datafile.channelLines(id),0,id);
+     
+function updateIdPositions(datafile)
+    YLim = get(gca, 'YLim');
+    axPos = get(gca,'Position');
+    figPos = get(gcf,'Position');
+    axPos(1) = axPos(1)*figPos(3);
+    axPos(2) = axPos(2)*figPos(4);
+    axPos(3) = axPos(3)*figPos(3);
+    axPos(4) = axPos(4)*figPos(4);
+    labels = datafile.channelIds;
+    for i=1:size(labels,1)
+        pos = get(labels(i),'Position');
+        width = pos(3);
+        height = pos(4);
+        if i*1000 < YLim(1) || i*1000 > YLim(2)
+            set(labels(i),'Visible','off');
+        else
+            bottom = axPos(2) + axPos(4)/(YLim(2)-YLim(1))*(i*1000-YLim(1));
+            set(labels(i),'Position',[axPos(1)-width-5, bottom - height/2,width,height]);
+            set(labels(i),'Visible','on');
+        end
+    end
+     
+ function onchannelclickHandler(object,~,id)
+     handles = guidata(gcf);
+     lines = handles.datafile.channelLines;
+     ids = handles.datafile.channelIds;
+     for i=1:size(lines,1)
+         lines(i).Color = 'black';
+         lines(i).LineWidth = 1;
+         ids(i).ForegroundColor = 'black';
+     end
+     object.Color = 'red';
+     object.LineWidth = 2;
+     ids(id).ForegroundColor = 'red';
     
 function datafile = updateWindow(handles,newWindow)
         datafile = handles.datafile;
@@ -199,15 +258,15 @@ function datafile = updateWindow(handles,newWindow)
         set(gca,'XLim',[newWindow(1),newWindow(2)]);
         datafile.dataWindow = newWindow;
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
-%         for i=1:2
-%            plot(gca,datafile.file.Data.x(i,startWindow+1:endWindow));
-%         end
         
+function resizeHandler(hObject,~,~)
+    handles = guidata(gcf);
+    updateIdPositions(handles.datafile);
 
 % UIWAIT makes untitled wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 function scrollHandler(hObject, eventdata, handles)
-     C = get (gca, 'CurrentPoint');
+    C = get (gca, 'CurrentPoint');
     XLim = get(gca, 'XLim');
     YLim = get(gca, 'YLim');
     if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
@@ -252,6 +311,7 @@ function scrollHandler(hObject, eventdata, handles)
             end
             handles.datafile = updateWindow(handles,window);
         end
+        updateIdPositions(handles.datafile);
         guidata(hObject, handles);
     end
 
