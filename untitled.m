@@ -56,6 +56,8 @@ handles.output = hObject;
 
 set(handles.figure1,'WindowButtonMotionFcn',@mousemoveHandler);
 set(handles.figure1,'WindowScrollWheelFcn',@scrollHandler);
+set(handles.figure1,'WindowKeyPressFcn',@keydownHandler);
+set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
 
 dataFile = '/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/dat/ARat_2016_07_18__0_002.dat';
 file = dir(dataFile);
@@ -76,16 +78,55 @@ datafile = struct(  'numberOfChannels',128,...
                     'maxWindowSize',50000,... % has to be smaller than maxBufferSize/4
                     'fileReader',-1,...
                     'newBufferStart',-1,...
-                    'newBufferEnd',-1);
+                    'newBufferEnd',-1,...
+                    'ylim',[0,30000]);
 datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
 % the whole file is loaded at once
 datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
 datafile.file = memmapfile(dataFile, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
 handles.datafile = datafile;
-handles.datafile = updateWindow(handles.datafile,[0,20000]);
+% hold(handles.axes1,'on');
+ax = gca;
+set(ax,'YLim',handles.datafile.ylim);
+ax.Clipping = 'off';
+handles.datafile = updateWindow(handles,[0,1000]);
+modifiers = struct('shift',0,'ctrl',0,'alt',0);
+handles.modifiers = modifiers;
 
 % Update handles structure
 guidata(hObject, handles);
+
+function keydownHandler(hObject, eventdata, handles)
+    handles = guidata(gcf);
+    if any(strcmp(eventdata.Modifier,'shift')) && (~handles.modifiers.shift)
+        fprintf('Shift down\n');
+        handles.modifiers.shift = 1;
+    end
+    if any(strcmp(eventdata.Modifier,'control')) && ~handles.modifiers.ctrl
+        fprintf('Ctrl down\n');
+        handles.modifiers.ctrl = 1;
+    end
+    if any(strcmp(eventdata.Modifier,'alt')) && ~handles.modifiers.alt
+        fprintf('Alt down\n');
+        handles.modifiers.alt = 1;
+    end
+    guidata(hObject, handles);
+    
+function keyupHandler(hObject, eventdata, handles)
+    handles = guidata(gcf);
+    if ~any(strcmp(eventdata.Modifier,'shift')) && handles.modifiers.shift
+        fprintf('Shift up\n');
+        handles.modifiers.shift = 0;
+    end
+    if ~any(strcmp(eventdata.Modifier,'control')) && handles.modifiers.ctrl
+        fprintf('Ctrl up\n');
+        handles.modifiers.ctrl = 0;
+    end
+    if ~any(strcmp(eventdata.Modifier,'alt')) && handles.modifiers.alt
+        fprintf('Alt up\n');
+        handles.modifiers.alt = 0;
+    end
+    guidata(hObject, handles);
 
 function mousemoveHandler(hObject, eventdata, handles)
 
@@ -103,13 +144,28 @@ function window = checkDataWindow(datafile,window)
         window(1) = window(2) - size;
     end
     
-function datafile = updateWindow(datafile,newWindow)
+function datafile = updateWindow(handles,newWindow)
+        datafile = handles.datafile;
         datafile.dataWindow = checkDataWindow(datafile,newWindow);
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
         startWindow = datafile.dataWindow(1);
         endWindow = datafile.dataWindow(2);
         fprintf('Start: %d, End: %d\n',startWindow,endWindow);
-        plot(gca,datafile.file.Data.x(65,startWindow+1:endWindow));
+%         axes(handles.axes1);
+%         cla
+        datafile.buffer = 0.195*int32(datafile.file.Data.x(:,startWindow+1:endWindow))';
+        for i=1:datafile.numberOfChannels
+            datafile.buffer(:,i) = datafile.buffer(:,i) + i*1000;
+        end
+        plot(handles.axes1,datafile.buffer);
+        set(gca,'YLim',datafile.ylim);
+        x = datafile.dataWindow(1):(datafile.windowSize/10):datafile.dataWindow(2);
+        set(gca,'XTick',linspace(0,size(datafile.buffer,1),size(x,2)));
+        set(gca,'XTickLabel',x);
+        set(gca,'XLim',[0,datafile.windowSize]);
+%         for i=1:2
+%            plot(gca,datafile.file.Data.x(i,startWindow+1:endWindow));
+%         end
         
 
 % UIWAIT makes untitled wait for user response (see UIRESUME)
@@ -121,13 +177,45 @@ function scrollHandler(hObject, eventdata, handles)
     if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
         YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
         handles = guidata(gcf);
-        window = handles.datafile.dataWindow;
-        if eventdata.VerticalScrollCount > 0 
-            window = window + handles.datafile.windowSize/20;
+        if ~handles.modifiers.shift
+            ySize = YLim(2) - YLim(1);
+            center = (YLim(1)+YLim(2))/2;
+            if ~handles.modifiers.ctrl
+                if eventdata.VerticalScrollCount > 0 
+                    YLim = YLim + ySize/20;
+                else
+                    YLim = YLim - ySize/20;
+                end
+            else 
+                if eventdata.VerticalScrollCount > 0 
+                    ySize = ySize*1.05;
+                else
+                   ySize = ySize*0.95;
+                end
+                YLim = [center - floor(ySize/2),center + ceil(ySize/2)];
+            end
+            handles.datafile.ylim = YLim;
+            set(gca,'YLim',handles.datafile.ylim);
         else
-            window = window - handles.datafile.windowSize/20;
+            window = handles.datafile.dataWindow;
+            if ~handles.modifiers.ctrl
+                if eventdata.VerticalScrollCount > 0 
+                    window = window + floor(handles.datafile.windowSize/20);
+                else
+                    window = window - floor(handles.datafile.windowSize/20);
+                end
+            else
+                center = floor((window(1) + window(2))/2);
+                if eventdata.VerticalScrollCount > 0 
+                    handles.datafile.windowSize = floor(handles.datafile.windowSize*1.05);
+                else
+                    handles.datafile.windowSize = floor(handles.datafile.windowSize*0.95);
+                end
+                window = [center - floor(handles.datafile.windowSize/2),...
+                          center + ceil(handles.datafile.windowSize/2)];
+            end
+            handles.datafile = updateWindow(handles,window);
         end
-        handles.datafile = updateWindow(handles.datafile,window);
         guidata(hObject, handles);
     end
 
