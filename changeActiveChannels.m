@@ -38,6 +38,9 @@ function [datafile,success] = changeActiveChannels( datafile,newActiveString )
 end
 
 function [a,b,c,index] = getNextBlock(str,start)
+    a = -1;
+    b = -1;
+    c = -1;
     [n,i] = getNextNum(str,start);
     if i == -1
         index = -1;
@@ -79,6 +82,7 @@ end
 
 % index is the last character in num
 function [num,index] = getNextNum(str,start)
+    num = -1;
     i = getNextNonSpaceCharIndex(str,start);
     if i==-1
         index = -1;
