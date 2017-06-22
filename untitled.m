@@ -59,6 +59,7 @@ set(handles.figure1,'WindowScrollWheelFcn',@scrollHandler);
 set(handles.figure1,'ResizeFcn',@resizeHandler);
 set(handles.figure1,'WindowKeyPressFcn',@keydownHandler);
 set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
+set(handles.figure1,'CloseRequestFcn',@closeHandler);
 set(handles.edit1,'Callback',@channelRangeEditHandler);
 handles.stafig = gobjects;
 
@@ -116,7 +117,7 @@ handles.modifiers = modifiers;
 
 % Update handles structure
 guidata(hObject, handles);
-loadSTA(hObject,'file');
+loadSTA(hObject,'/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/mat/');
 
 function keydownHandler(hObject, eventdata, handles)
     handles = guidata(hObject);
@@ -155,6 +156,12 @@ function mousemoveHandler(hObject, eventdata, handles)
     C = get (findobj(hObject,'Type','Axes'), 'CurrentPoint');
     %fprintf('Mouse: [%d,%d]\n',C(1,1),C(1,2));
 
+function closeHandler(hObject,eventdata)
+    handles = guidata(hObject);
+    if isfield(handles,'stafig')
+        close(handles.stafig);
+    end
+    delete(hObject);
 
 
 % --- Outputs from this function are returned to the command line.
