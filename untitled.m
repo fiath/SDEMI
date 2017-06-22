@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 20-Jun-2017 08:28:02
+% Last Modified by GUIDE v2.5 22-Jun-2017 09:43:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,6 +59,7 @@ set(handles.figure1,'WindowScrollWheelFcn',@scrollHandler);
 set(handles.figure1,'ResizeFcn',@resizeHandler);
 set(handles.figure1,'WindowKeyPressFcn',@keydownHandler);
 set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
+set(handles.edit1,'Callback',@channelRangeEditHandler);
 
 dataFile = '/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/dat/ARat_2016_07_18__0_002.dat';
 file = dir(dataFile);
@@ -69,6 +70,7 @@ datafile = struct(  'numberOfChannels',128,...
                     'length',-1,...
                     'channelLines',[],...
                     'activeChannels',[],...
+                    'channelRangeString','',...
                     'channelIds',[],...
                     'bufferStart',0,...
                     'bufferEnd',0,...
@@ -90,11 +92,16 @@ datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
 datafile.file = memmapfile(dataFile, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
 datafile.channelLines = gobjects(datafile.numberOfChannels,1);
 datafile.channelIds = gobjects(datafile.numberOfChannels,1);
+datafile.activeChannels = ones(1,datafile.numberOfChannels);
+[datafile,success] = changeActiveChannels(datafile,'65:128');
+set(handles.edit1,'String',datafile.channelRangeString);
+datafile.activeChannels;
+%datafile.activeChannels(1,1:120) = 0;
 %set(gca,'Units','pixels');
 for i=1:datafile.numberOfChannels
-    datafile.channelIds(i) = uicontrol('Style','text','String',num2str(i),'Position',[0,0,20,13]);
+    datafile.channelIds(i) = uicontrol('Style','text','String',num2str(i),'Position',[0,0,40,13]);
     set(datafile.channelIds(i),'ButtonDownFcn',{@onChannelIdHandler,i},'Enable','inactive');
-    %set(datafile.channelIds(i),'Enable','inactive');
+    set(datafile.channelIds(i),'HorizontalAlignment','right');
 end
 handles.datafile = datafile;
 % hold(handles.axes1,'on');
@@ -145,175 +152,6 @@ function mousemoveHandler(hObject, eventdata, handles)
     C = get (gca, 'CurrentPoint');
     %fprintf('Mouse: [%d,%d]\n',C(1,1),C(1,2));
 
-function window = checkDataWindow(datafile,window)
-    size = min([datafile.length,datafile.maxWindowSize,window(2) - window(1)]);
-    if size < 0
-        error("newDataWindow.size cannot be negative");
-    end
-    center = floor((window(1) + window(2))/2)
-    window(1) = center - ceil(size/2);
-    window(2) = center + floor(size/2);
-    if window(1) < 0
-        window(1) = 0;
-        window(2) = size;
-    end
-    if window(2) >= datafile.length
-        window(2) = datafile.length-1;
-        window(1) = window(2) - size;
-    end
-    
- function datafile = updateBuffer(datafile,newWindow)
-    center = floor((newWindow(1) + newWindow(2))/2 - datafile.bufferStart);
-    if datafile.bufferEnd ~= 0
-        % we already have a valid buffer
-        if center > datafile.loadStart && center < datafile.loadEnd
-            % we don't have to update the buffer
-            return
-        end
-        if center <= datafile.loadStart && datafile.bufferStart == 0
-            % we have no data before
-            return
-        end
-        if center >= datafile.loadEnd && datafile.bufferEnd == datafile.length
-            % we have no data after
-            return
-        end
-    end
-    % center the buffer at center
-    global_center = floor((newWindow(1) + newWindow(2))/2);
-    beginBuffer = max(0,global_center - floor(datafile.bufferSize/2));
-    endBuffer = min(datafile.length,global_center + ceil(datafile.bufferSize/2));
-    if beginBuffer == 0
-        endBuffer = datafile.bufferSize;
-    end
-    if endBuffer == datafile.length
-        beginBuffer = datafile.length - datafile.bufferSize;
-    end
-    datafile.buffer = 0.195*int32(datafile.file.Data.x(:,beginBuffer+1:endBuffer))';
-    for i=1:datafile.numberOfChannels
-        datafile.buffer(:,i) = datafile.buffer(:,i) + i*1000;
-    end
-    cla;
-    x = linspace(beginBuffer,endBuffer,size(datafile.buffer,1));
-    for i=1:datafile.numberOfChannels
-        datafile.channelLines(i) = plot(x,datafile.buffer(:,i),'Color','black');
-        set(datafile.channelLines(i),'ButtonDownFcn',{@onchannelclickHandler,i});
-        hold on;
-    end
-    set(gca,'YTickLabel',[]);
-    yticks((1:128)*1000);
-%     ax = gca;
-    datafile.bufferStart = beginBuffer;
-    datafile.bufferEnd = endBuffer;
-   
- function onChannelIdHandler(object,~,id)
-     handles = guidata(gcf);
-     onchannelclickHandler(handles.datafile.channelLines(id),0,id);
-     
-function updateIdPositions(datafile)
-    YLim = get(gca, 'YLim');
-    axPos = get(gca,'Position');
-    figPos = get(gcf,'Position');
-    axPos(1) = axPos(1)*figPos(3);
-    axPos(2) = axPos(2)*figPos(4);
-    axPos(3) = axPos(3)*figPos(3);
-    axPos(4) = axPos(4)*figPos(4);
-    labels = datafile.channelIds;
-    for i=1:size(labels,1)
-        pos = get(labels(i),'Position');
-        width = pos(3);
-        height = pos(4);
-        if i*1000 < YLim(1) || i*1000 > YLim(2)
-            set(labels(i),'Visible','off');
-        else
-            bottom = axPos(2) + axPos(4)/(YLim(2)-YLim(1))*(i*1000-YLim(1));
-            set(labels(i),'Position',[axPos(1)-width-5, bottom - height/2,width,height]);
-            set(labels(i),'Visible','on');
-        end
-    end
-     
- function onchannelclickHandler(object,~,id)
-     handles = guidata(gcf);
-     lines = handles.datafile.channelLines;
-     ids = handles.datafile.channelIds;
-     for i=1:size(lines,1)
-         lines(i).Color = 'black';
-         lines(i).LineWidth = 1;
-         ids(i).ForegroundColor = 'black';
-     end
-     object.Color = 'red';
-     object.LineWidth = 2;
-     ids(id).ForegroundColor = 'red';
-    
-function datafile = updateWindow(handles,newWindow)
-        datafile = handles.datafile;
-        newWindow = checkDataWindow(datafile,newWindow);
-        datafile = updateBuffer(datafile,newWindow);
-        startWindow = newWindow(1);      
-        endWindow = newWindow(2);
-        fprintf('Start: %d, End: %d\n',startWindow,endWindow);
-%         axes(handles.axes1);
-%         cla
-        set(gca,'YLim',datafile.ylim);
-        set(gca,'XLim',[newWindow(1),newWindow(2)]);
-        datafile.dataWindow = newWindow;
-        datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
-        
-function resizeHandler(hObject,~,~)
-    handles = guidata(gcf);
-    updateIdPositions(handles.datafile);
-
-% UIWAIT makes untitled wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-function scrollHandler(hObject, eventdata, handles)
-    C = get (gca, 'CurrentPoint');
-    XLim = get(gca, 'XLim');
-    YLim = get(gca, 'YLim');
-    if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
-        YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
-        handles = guidata(gcf);
-        if ~handles.modifiers.shift
-            ySize = YLim(2) - YLim(1);
-            center = (YLim(1)+YLim(2))/2;
-            if ~handles.modifiers.ctrl
-                if eventdata.VerticalScrollCount < 0 
-                    YLim = YLim + ySize/20;
-                else
-                    YLim = YLim - ySize/20;
-                end
-            else 
-                if eventdata.VerticalScrollCount > 0 
-                    ySize = ySize + max([ySize*0.05,10]);
-                else
-                   ySize = ySize*0.95;
-                end
-                YLim = [center - floor(ySize/2),center + ceil(ySize/2)];
-            end
-            handles.datafile.ylim = YLim;
-            set(gca,'YLim',handles.datafile.ylim);
-        else
-            window = handles.datafile.dataWindow;
-            if ~handles.modifiers.ctrl
-                if eventdata.VerticalScrollCount > 0 
-                    window = window + floor(handles.datafile.windowSize/20);
-                else
-                    window = window - floor(handles.datafile.windowSize/20);
-                end
-            else
-                center = floor((window(1) + window(2))/2);
-                if eventdata.VerticalScrollCount > 0 
-                    handles.datafile.windowSize = floor(handles.datafile.windowSize + max([5,handles.datafile.windowSize*0.05]));
-                else
-                    handles.datafile.windowSize = floor(handles.datafile.windowSize*0.95);
-                end
-                window = [center - floor(handles.datafile.windowSize/2),...
-                          center + ceil(handles.datafile.windowSize/2)];
-            end
-            handles.datafile = updateWindow(handles,window);
-        end
-        updateIdPositions(handles.datafile);
-        guidata(hObject, handles);
-    end
 
 
 % --- Outputs from this function are returned to the command line.
@@ -420,3 +258,72 @@ function figure1_WindowScrollWheelFcn(hObject, eventdata, handles)
 %	VerticalScrollCount: signed integer indicating direction and number of clicks
 %	VerticalScrollAmount: number of lines scrolled for each click
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit1_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit2_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
