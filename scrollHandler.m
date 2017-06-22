@@ -1,10 +1,10 @@
 function scrollHandler(hObject, eventdata, handles)
-    C = get (gca, 'CurrentPoint');
-    XLim = get(gca, 'XLim');
-    YLim = get(gca, 'YLim');
+    handles = guidata(hObject);
+    C = get (handles.axes1, 'CurrentPoint');
+    XLim = get(handles.axes1, 'XLim');
+    YLim = get(handles.axes1, 'YLim');
     if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
         YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
-        handles = guidata(gcf);
         if ~handles.modifiers.shift
             ySize = YLim(2) - YLim(1);
             center = (YLim(1)+YLim(2))/2;
@@ -23,7 +23,7 @@ function scrollHandler(hObject, eventdata, handles)
                 YLim = [center - floor(ySize/2),center + ceil(ySize/2)];
             end
             handles.datafile.ylim = YLim;
-            set(gca,'YLim',handles.datafile.ylim);
+            set(handles.axes1,'YLim',handles.datafile.ylim);
         else
             window = handles.datafile.dataWindow;
             if ~handles.modifiers.ctrl
@@ -44,7 +44,7 @@ function scrollHandler(hObject, eventdata, handles)
             end
             handles.datafile = updateWindow(handles,window);
         end
-        updateIdPositions(handles.datafile);
+        updateIdPositions(handles);
         guidata(hObject, handles);
     end
 

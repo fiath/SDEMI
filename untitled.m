@@ -60,6 +60,7 @@ set(handles.figure1,'ResizeFcn',@resizeHandler);
 set(handles.figure1,'WindowKeyPressFcn',@keydownHandler);
 set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
 set(handles.edit1,'Callback',@channelRangeEditHandler);
+handles.stafig = gobjects;
 
 dataFile = '/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/dat/ARat_2016_07_18__0_002.dat';
 file = dir(dataFile);
@@ -105,19 +106,20 @@ for i=1:datafile.numberOfChannels
 end
 handles.datafile = datafile;
 % hold(handles.axes1,'on');
-ax = gca;
+ax = handles.axes1;
 set(ax,'YLim',handles.datafile.ylim);
 ax.Clipping = 'off';
 handles.datafile = updateWindow(handles,[0,1000]);
-updateIdPositions(handles.datafile);
+updateIdPositions(handles);
 modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.modifiers = modifiers;
 
 % Update handles structure
 guidata(hObject, handles);
+loadSTA(hObject,'file');
 
 function keydownHandler(hObject, eventdata, handles)
-    handles = guidata(gcf);
+    handles = guidata(hObject);
     if any(strcmp(eventdata.Modifier,'shift')) && (~handles.modifiers.shift)
         fprintf('Shift down\n');
         handles.modifiers.shift = 1;
@@ -132,8 +134,9 @@ function keydownHandler(hObject, eventdata, handles)
     end
     guidata(hObject, handles);
     
+    
 function keyupHandler(hObject, eventdata, handles)
-    handles = guidata(gcf);
+    handles = guidata(hObject);
     if ~any(strcmp(eventdata.Modifier,'shift')) && handles.modifiers.shift
         fprintf('Shift up\n');
         handles.modifiers.shift = 0;
@@ -149,7 +152,7 @@ function keyupHandler(hObject, eventdata, handles)
     guidata(hObject, handles);
 
 function mousemoveHandler(hObject, eventdata, handles)
-    C = get (gca, 'CurrentPoint');
+    C = get (findobj(hObject,'Type','Axes'), 'CurrentPoint');
     %fprintf('Mouse: [%d,%d]\n',C(1,1),C(1,2));
 
 

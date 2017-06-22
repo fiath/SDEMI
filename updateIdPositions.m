@@ -1,7 +1,8 @@
-function updateIdPositions(datafile)
-    YLim = get(gca, 'YLim');
-    axPos = get(gca,'Position');
-    figPos = get(gcf,'Position');
+function updateIdPositions(handles)
+    datafile = handles.datafile;
+    YLim = get(handles.axes1, 'YLim');
+    axPos = get(handles.axes1,'Position');
+    figPos = get(handles.figure1,'Position');
     axPos(1) = axPos(1)*figPos(3);
     axPos(2) = axPos(2)*figPos(4);
     axPos(3) = axPos(3)*figPos(3);

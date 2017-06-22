@@ -1,5 +1,5 @@
  function onchannelclickHandler(object,~,id)
-     handles = guidata(gcf);
+     handles = guidata(object);
      lines = handles.datafile.channelLines;
      ids = handles.datafile.channelIds;
      for i=1:size(lines,1)

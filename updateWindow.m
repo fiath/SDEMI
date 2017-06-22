@@ -2,16 +2,17 @@ function datafile = updateWindow(handles,newWindow,force)
         if nargin < 3
             force = 0;
         end
+        ax = handles.axes1;
         datafile = handles.datafile;
         newWindow = checkDataWindow(datafile,newWindow);
-        datafile = updateBuffer(datafile,newWindow,force);
+        datafile = updateBuffer(ax,datafile,newWindow,force);
         startWindow = newWindow(1);      
         endWindow = newWindow(2);
         fprintf('Start: %d, End: %d\n',startWindow,endWindow);
 %         axes(handles.axes1);
 %         cla
-        set(gca,'YLim',datafile.ylim);
-        set(gca,'XLim',[newWindow(1),newWindow(2)]);
+        set(ax,'YLim',datafile.ylim);
+        set(ax,'XLim',[newWindow(1),newWindow(2)]);
         datafile.dataWindow = newWindow;
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
         
@@ -33,7 +34,7 @@ function window = checkDataWindow(datafile,window)
         window(1) = window(2) - size;
     end
     
- function datafile = updateBuffer(datafile,newWindow,force)
+ function datafile = updateBuffer(ax,datafile,newWindow,force)
     center = floor((newWindow(1) + newWindow(2))/2 - datafile.bufferStart);
     if ~force && datafile.bufferEnd ~= 0
         % we already have a valid buffer
@@ -68,17 +69,17 @@ function window = checkDataWindow(datafile,window)
             next_active_offset = next_active_offset + 1;
         end
     end
-    cla;
+    cla(ax);
     x = linspace(beginBuffer,endBuffer,size(datafile.buffer,1));
     for i=1:datafile.numberOfChannels
          if ~datafile.activeChannels(i)
              continue;
          end
-        datafile.channelLines(i) = plot(x,datafile.buffer(:,i),'Color','black');
+        datafile.channelLines(i) = plot(ax,x,datafile.buffer(:,i),'Color','black');
         set(datafile.channelLines(i),'ButtonDownFcn',{@onchannelclickHandler,i});
         hold on;
     end
-    set(gca,'YTickLabel',[]);
+    set(ax,'YTickLabel',[]);
     yticks((1:(next_active_offset-1))*1000);
 %     ax = gca;
     datafile.bufferStart = beginBuffer;

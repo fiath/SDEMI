@@ -1,7 +1,7 @@
 function resizeHandler(hObject,~,~)
     fprintf('ResizeHandler called\n');
-    handles = guidata(gcf);
-    updateIdPositions(handles.datafile);
+    handles = guidata(hObject);
+    updateIdPositions(handles);
     
     pos = get(handles.edit1,'Position');
     width = pos(3);
