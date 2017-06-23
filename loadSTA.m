@@ -27,6 +27,8 @@ function loadSTA(fig)
     set(stafig,'CloseRequestFcn',@closeHandler);
     set(stafig,'ResizeFcn',@resizeHandler);
     set(stafig,'WindowScrollWheelFcn',@scrollHandler);
+    set(stafig,'WindowButtonDownFcn',@stafigButtonDownHandler);
+    set(stafig,'WindowButtonMotionFcn',@stafigMouseMoveHandler);
     handles.stafig = stafig;
     set(handles.traceview,'Enable','off');
     guidata(fig,handles);
@@ -36,6 +38,8 @@ function loadSTA(fig)
     handles.lines = gobjects(1,handles.column);
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
+    hold(handles.axes1,'all');
+    %set(handles.axes1,'ButtonDownFcn',@buttonDownHandler);
     handles.position = -1; % in datapoints
     colormap(handles.heatmap,'jet');
     
@@ -116,3 +120,24 @@ function scrollHandler(hObject,eventdata,~)
     end
 end
 
+function buttonDownHandler(hObject,eventdata,~)
+    fprintf('Waveform clicked\n');
+end
+
+function stafigButtonDownHandler(hObject,eventdata,~)
+    % expects left mouse click but will work with right click as well
+    handles = guidata(hObject);
+    C = get (handles.axes1, 'CurrentPoint');
+    XLim = get(handles.axes1, 'XLim');
+    YLim = get(handles.axes1, 'YLim');
+    if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
+        YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
+        % clicked inside axes1
+        pos = rem(C(1,1),size(handles.data,2)-1);
+        pos = floor(pos);
+        plotHeatmap(handles.stafig,pos);
+    end
+end
+
+function stafigMouseMoveHandler(hObject,eventdata,~)
+end
