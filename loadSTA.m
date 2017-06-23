@@ -1,14 +1,28 @@
 function loadSTA(fig, dirpath )
 %LOADSTA Summary of this function goes here
 %   Detailed explanation goes here
+    
+    % set up gui
     handles = guidata(fig);
     stafig = matlab.hg.internal.openfigLegacy('sta', 'reuse', 'visible');
     set(stafig,'CloseRequestFcn',@closeHandler);
+    set(stafig,'ResizeFcn',@resizeHandler);
+    set(stafig,'WindowScrollWheelFcn',@scrollHandler);
     handles.stafig = stafig;
     guidata(fig,handles);
     handles = struct('rawfig',fig);
     handles.stafig = stafig;
-    handles.axes1 = findobj(stafig,'Type','axes');
+    handles.column = 4;
+    handles.lines = gobjects(1,handles.column);
+    handles.axes1 = findobj(stafig,'Tag','axes1');
+    handles.heatmap = findobj(stafig,'Tag','axes2');
+    handles.position = -1; % in datapoints
+    colormap(handles.heatmap,'jet');
+    
+    
+    
+    
+    % read data
     handles.data = [];
     handles.unit = -1;
     dataList = dir([dirpath '*.mat']);
@@ -45,5 +59,40 @@ end
 function dropdownHandler(hObject,~,~)
     handles = guidata(hObject);
     plotSTA(handles.stafig,get(hObject,'Value'));
+end
+
+function resizeHandler(hObject,~,~)
+    % reposition dropdown menu
+    handles = guidata(hObject);
+    
+    pos = get(handles.dropDown,'Position');
+    width = pos(3);
+    height = pos(4);
+    axPos = get(handles.axes1,'Position');
+    figPos = get(handles.stafig,'Position');
+    top = (axPos(2) + axPos(4))*figPos(4);
+    center = (axPos(1) + axPos(3)/2)*figPos(3);
+    set(handles.dropDown,'Position',[center - width/2,top + 5,width,height]);
+end
+
+function scrollHandler(hObject,eventdata,~)
+    handles = guidata(hObject);
+    C = get (handles.axes1, 'CurrentPoint');
+    XLim = get(handles.axes1, 'XLim');
+    YLim = get(handles.axes1, 'YLim');
+    if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
+        YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
+        wfScrollHandler(hObject,eventdata.VerticalScrollCount);
+        return;
+    end
+    
+    C = get (handles.heatmap, 'CurrentPoint');
+    XLim = get(handles.heatmap, 'XLim');
+    YLim = get(handles.heatmap, 'YLim');
+    if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
+        YLim(1)<=C(1,2) && YLim(2)>=C(1,2) && isfield(handles.heatmap,'ScrollFcn')
+        handles.heatmap.ScrollFcn(hObject,eventdata.VerticalScrollCount);
+        return;
+    end
 end
 
