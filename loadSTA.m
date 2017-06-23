@@ -2,18 +2,33 @@ function loadSTA(fig)
 %LOADSTA Summary of this function goes here
 %   Detailed explanation goes here
 
-    dirpath = uigetdir('','Select the directory containing the .mat files');
+    handles = guidata(fig);
+
+    startdir = handles.datafile.filedir(1:end-1);
+    startdir = startdir(1:find(startdir=='/',1,'last')-1);
+    dirpath = uigetdir(startdir,'Select the directory containing the .mat files');
     if dirpath == 0
         return;
     end
     
+    dirpath = [dirpath '/'];
+    dataList = dir([dirpath '*.mat']);
+    if isempty(dataList)
+        % directory contains no .mat files.
+        return
+    end
+    
+    if isgraphics(handles.stafig)
+        close(handles.stafig);
+    end
+    
     % set up gui
-    handles = guidata(fig);
     stafig = matlab.hg.internal.openfigLegacy('sta', 'reuse', 'visible');
     set(stafig,'CloseRequestFcn',@closeHandler);
     set(stafig,'ResizeFcn',@resizeHandler);
     set(stafig,'WindowScrollWheelFcn',@scrollHandler);
     handles.stafig = stafig;
+    set(handles.traceview,'Enable','off');
     guidata(fig,handles);
     handles = struct('rawfig',fig);
     handles.stafig = stafig;
@@ -30,7 +45,6 @@ function loadSTA(fig)
     % read data
     handles.data = [];
     handles.unit = -1;
-    dataList = dir([dirpath '*.mat']);
     name = dataList(1).name;
     suffix = name(length(strtok(name,'.'))+1:length(name));
     ids = zeros(1,length(dataList));
@@ -57,6 +71,7 @@ function closeHandler(hObject,~,~)
     rawfig = handles.rawfig;
     handles = guidata(rawfig);
     handles.stafig = gobjects;
+    set(handles.traceview,'Enable','on');
     guidata(rawfig,handles);
     delete(hObject);
 end

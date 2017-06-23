@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 23-Jun-2017 13:02:25
+% Last Modified by GUIDE v2.5 23-Jun-2017 14:21:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -331,3 +331,12 @@ function traceview_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     handles = guidata(hObject);
     loadDat(handles.figure1);
+
+
+% --------------------------------------------------------------------
+function waveformview_Callback(hObject, eventdata, handles)
+% hObject    handle to waveformview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
+    loadSTA(handles.figure1);

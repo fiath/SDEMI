@@ -43,5 +43,6 @@ function clearTraceView( fig )
     guidata(fig,handles);
     
     hideAllChildren(fig);
+    set(handles.waveformview,'Enable','off');
 end
 

@@ -2,7 +2,7 @@ function loadDat(fig)
 %LOADDAT Summary of this function goes here
 %   Detailed explanation goes here
 
-    [filename,path] = uigetfile('*.dat','Select .dat file');
+    [filename,path] = uigetfile('*.dat','Select .dat file','/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/dat/');
     if filename == 0
         return;
     end
@@ -16,6 +16,7 @@ function loadDat(fig)
     
     datafile = handles.datafile;
     
+    datafile.filedir = path;
     datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
     % the whole file is loaded at once
     datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
@@ -44,5 +45,6 @@ function loadDat(fig)
     guidata(fig,handles);
     
     showAllChildren(fig);
+    set(handles.waveformview,'Enable','on');
 end
 
