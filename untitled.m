@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 22-Jun-2017 09:43:43
+% Last Modified by GUIDE v2.5 23-Jun-2017 13:02:25
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -52,6 +52,9 @@ function untitled_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to untitled (see VARARGIN)
 
 % Choose default command line output for untitled
+hideAllChildren(handles.figure1);
+
+
 handles.output = hObject;
 
 set(handles.figure1,'WindowButtonMotionFcn',@mousemoveHandler);
@@ -63,9 +66,7 @@ set(handles.figure1,'CloseRequestFcn',@closeHandler);
 set(handles.edit1,'Callback',@channelRangeEditHandler);
 handles.stafig = gobjects;
 
-dataFile = '/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/dat/ARat_2016_07_18__0_002.dat';
-file = dir(dataFile);
-datafile = struct(  'numberOfChannels',128,...
+handles.datafile = struct(  'numberOfChannels',128,...
                     'resolution',2,...
                     'samplingRate',20000,...
                     'file',-1,...
@@ -88,36 +89,13 @@ datafile = struct(  'numberOfChannels',128,...
                     'newBufferStart',-1,...
                     'newBufferEnd',-1,...
                     'ylim',[0,30000]);
-datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
-% the whole file is loaded at once
-datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
-datafile.file = memmapfile(dataFile, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
-datafile.channelLines = gobjects(datafile.numberOfChannels,1);
-datafile.channelIds = gobjects(datafile.numberOfChannels,1);
-datafile.activeChannels = ones(1,datafile.numberOfChannels);
-[datafile,success] = changeActiveChannels(datafile,'65:128');
-set(handles.edit1,'String',datafile.channelRangeString);
-datafile.activeChannels;
-%datafile.activeChannels(1,1:120) = 0;
-%set(gca,'Units','pixels');
-for i=1:datafile.numberOfChannels
-    datafile.channelIds(i) = uicontrol('Style','text','String',num2str(i),'Position',[0,0,40,13]);
-    set(datafile.channelIds(i),'ButtonDownFcn',{@onChannelIdHandler,i},'Enable','inactive');
-    set(datafile.channelIds(i),'HorizontalAlignment','right');
-end
-handles.datafile = datafile;
-% hold(handles.axes1,'on');
-ax = handles.axes1;
-set(ax,'YLim',handles.datafile.ylim);
-ax.Clipping = 'off';
-handles.datafile = updateWindow(handles,[0,1000]);
-updateIdPositions(handles);
-modifiers = struct('shift',0,'ctrl',0,'alt',0);
-handles.modifiers = modifiers;
+
+handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
+handles.datLoaded = 0;
 
 % Update handles structure
 guidata(hObject, handles);
-loadSTA(hObject,'/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/mat/');
+%loadSTA(hObject,'/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/mat/');
 
 function keydownHandler(hObject, eventdata, handles)
     handles = guidata(hObject);
@@ -158,7 +136,7 @@ function mousemoveHandler(hObject, eventdata, handles)
 
 function closeHandler(hObject,eventdata)
     handles = guidata(hObject);
-    if isfield(handles,'stafig')
+    if isgraphics(handles.stafig)
         close(handles.stafig);
     end
     delete(hObject);
@@ -337,3 +315,19 @@ function edit2_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --------------------------------------------------------------------
+function views_Callback(hObject, eventdata, handles)
+% hObject    handle to views (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function traceview_Callback(hObject, eventdata, handles)
+% hObject    handle to traceview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
+    loadDat(handles.figure1);

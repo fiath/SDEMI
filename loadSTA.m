@@ -1,6 +1,11 @@
-function loadSTA(fig, dirpath )
+function loadSTA(fig)
 %LOADSTA Summary of this function goes here
 %   Detailed explanation goes here
+
+    dirpath = uigetdir('','Select the directory containing the .mat files');
+    if dirpath == 0
+        return;
+    end
     
     % set up gui
     handles = guidata(fig);
@@ -51,7 +56,7 @@ function closeHandler(hObject,~,~)
     handles = guidata(hObject);
     rawfig = handles.rawfig;
     handles = guidata(rawfig);
-    handles = rmfield(handles,'stafig');
+    handles.stafig = gobjects;
     guidata(rawfig,handles);
     delete(hObject);
 end
