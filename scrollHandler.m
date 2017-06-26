@@ -24,6 +24,11 @@ function scrollHandler(hObject, eventdata, handles)
             end
             handles.datafile.ylim = YLim;
             set(handles.axes1,'YLim',handles.datafile.ylim);
+            
+            % update pivot line
+            center = round((handles.datafile.dataWindow(1) + handles.datafile.dataWindow(2))/2);
+            delete(handles.datafile.pivotLine);
+            handles.datafile.pivotLine = line(handles.axes1,[center,center],get(handles.axes1,'YLim'));
         else
             window = handles.datafile.dataWindow;
             if ~handles.modifiers.ctrl
@@ -46,5 +51,6 @@ function scrollHandler(hObject, eventdata, handles)
         end
         updateIdPositions(handles);
         guidata(hObject, handles);
+        updateTooltip(hObject);
     end
 

@@ -20,6 +20,11 @@ function datafile = updateWindow(handles,newWindow,force)
         set(handles.positionEditText,'String',datafile.centerString);
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
         
+        % update pivot line
+        center = round((datafile.dataWindow(1) + datafile.dataWindow(2))/2);
+        delete(datafile.pivotLine);
+        datafile.pivotLine = line(ax,[center,center],get(ax,'YLim'));
+        
 
 function window = checkDataWindow(datafile,window)
     size = min([datafile.length,datafile.maxWindowSize,window(2) - window(1)]);

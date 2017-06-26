@@ -24,4 +24,7 @@ function resizeHandler(hObject,~,~)
     height = pos(4);
     set(handles.positionEditText,'Position',[Hcenter - width/2,top + 10,width,height]);
     
+    % 
+    updateTooltip(hObject);
+    
 

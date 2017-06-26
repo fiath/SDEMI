@@ -33,7 +33,8 @@ function success = plotHeatmap( fig, position )
         set(h,'alphadata',~isnan(hm_data));
     end
     caxis(handles.heatmap,[-max_abs_v,max_abs_v]);
-    colorbar(handles.heatmap);
+    C = colorbar(handles.heatmap);
+    C.UIContextMenu = '';
     
     guidata(fig,handles);
     updateLinePosition(fig);

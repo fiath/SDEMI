@@ -91,7 +91,9 @@ handles.datafile = struct(  'numberOfChannels',128,...
                     'newBufferEnd',-1,...
                     'ylim',[0,30000],...
                     'centerString','',...
-                    'timeFormat','%dh%dm%ds.%03d');
+                    'pivotLine',gobjects,...
+                    'timeFormat','%dh%dm%d.%03ds',...
+                    'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt));
 
 handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.datLoaded = 0;
@@ -134,8 +136,8 @@ function keyupHandler(hObject, eventdata, handles)
     guidata(hObject, handles);
 
 function mousemoveHandler(hObject, eventdata, handles)
-    C = get (findobj(hObject,'Type','Axes'), 'CurrentPoint');
-    %fprintf('Mouse: [%d,%d]\n',C(1,1),C(1,2));
+    fprintf('MouseMoveEvent\n');
+    updateTooltip(hObject);
 
 function closeHandler(hObject,eventdata)
     handles = guidata(hObject);
