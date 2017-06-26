@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 23-Jun-2017 15:41:21
+% Last Modified by GUIDE v2.5 26-Jun-2017 09:22:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -64,6 +64,7 @@ set(handles.figure1,'WindowKeyPressFcn',@keydownHandler);
 set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
 set(handles.figure1,'CloseRequestFcn',@closeHandler);
 set(handles.edit1,'Callback',@channelRangeEditHandler);
+set(handles.positionEditText,'Callback',@positionEditHandler);
 handles.stafig = gobjects;
 
 handles.datafile = struct(  'numberOfChannels',128,...
@@ -88,7 +89,9 @@ handles.datafile = struct(  'numberOfChannels',128,...
                     'fileReader',-1,...
                     'newBufferStart',-1,...
                     'newBufferEnd',-1,...
-                    'ylim',[0,30000]);
+                    'ylim',[0,30000],...
+                    'centerString','',...
+                    'timeFormat','%dh%dm%ds.%03d');
 
 handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.datLoaded = 0;
@@ -340,3 +343,26 @@ function waveformview_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     handles = guidata(hObject);
     loadSTA(handles.figure1);
+
+
+
+function positionEditText_Callback(hObject, eventdata, handles)
+% hObject    handle to positionEditText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of positionEditText as text
+%        str2double(get(hObject,'String')) returns contents of positionEditText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function positionEditText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to positionEditText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

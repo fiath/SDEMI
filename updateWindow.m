@@ -14,13 +14,17 @@ function datafile = updateWindow(handles,newWindow,force)
         set(ax,'YLim',datafile.ylim);
         set(ax,'XLim',[newWindow(1),newWindow(2)]);
         datafile.dataWindow = newWindow;
+        datafile.centerString = timeToString(round((datafile.dataWindow(1) + ...
+            datafile.dataWindow(2))/2*1000/datafile.samplingRate),...
+            handles.datafile.timeFormat)
+        set(handles.positionEditText,'String',datafile.centerString);
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
         
 
 function window = checkDataWindow(datafile,window)
     size = min([datafile.length,datafile.maxWindowSize,window(2) - window(1)]);
     if size < 0
-        error("newDataWindow.size cannot be negative");
+        error('newDataWindow.size cannot be negative');
     end
     center = floor((window(1) + window(2))/2);
     window(1) = center - ceil(size/2);
