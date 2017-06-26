@@ -29,6 +29,7 @@ function loadSTA(fig)
     set(stafig,'WindowScrollWheelFcn',@scrollHandler);
     set(stafig,'WindowButtonDownFcn',@stafigButtonDownHandler);
     set(stafig,'WindowButtonMotionFcn',@stafigMouseMoveHandler);
+    set(stafig,'WindowKeyPressFcn',@staKeydownHandler);
     handles.stafig = stafig;
     set(handles.traceview,'Enable','off');
     guidata(fig,handles);

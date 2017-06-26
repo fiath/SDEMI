@@ -16,7 +16,7 @@ function datafile = updateWindow(handles,newWindow,force)
         datafile.dataWindow = newWindow;
         datafile.centerString = timeToString(round((datafile.dataWindow(1) + ...
             datafile.dataWindow(2))/2*1000/datafile.samplingRate),...
-            handles.datafile.timeFormat)
+            handles.datafile.timeFormat);
         set(handles.positionEditText,'String',datafile.centerString);
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
         

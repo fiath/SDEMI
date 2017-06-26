@@ -2,6 +2,11 @@ function plotSTA(fig,unit)
 %PLOTSTA Summary of this function goes here
 %   Detailed explanation goes here
     handles = guidata(fig);
+    if unit < 1
+        unit = 1;
+    elseif unit > size(handles.data,3)
+        unit = size(handles.data,3);
+    end
     data = handles.data(:,:,unit);
     ax = handles.axes1;
     cla(ax);
