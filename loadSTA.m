@@ -39,8 +39,12 @@ function loadSTA(fig)
     handles.lines = gobjects(1,handles.column);
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
+    handles.globalSave = findobj(stafig,'Tag','save');
+    set(handles.globalSave,'Callback',@saveFigure);
     hold(handles.axes1,'all');
-    %set(handles.axes1,'ButtonDownFcn',@buttonDownHandler);
+    handles.heatCtxMenu = uicontextmenu(handles.stafig);
+    topmenu = uimenu('Parent',handles.heatCtxMenu,'Label','Save image','Callback',@saveImage);
+    %set(handles.heatmap,'ButtonDownFcn',@buttonDownHandler);
     handles.position = -1; % in datapoints
     colormap(handles.heatmap,'jet');
     

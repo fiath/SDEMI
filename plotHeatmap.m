@@ -27,6 +27,8 @@ function success = plotHeatmap( fig, position )
     end
     max_abs_v = max(max(abs(handles.data(:,:,handles.unit))));
     h = imagesc(handles.heatmap,hm_data);
+    handles.heatMapImage = h;
+    h.UIContextMenu = handles.heatCtxMenu;
     if c*r ~= size(handles.data)
         set(h,'alphadata',~isnan(hm_data));
     end
