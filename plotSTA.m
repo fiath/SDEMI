@@ -44,8 +44,9 @@ function plotSTA(fig,unit)
     evFilePath = handles.unitNames{handles.unit};
     evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
     acorr = loadAutoCorr(evFilePath,20,30);
-    bar(handles.autocorr,[-30:-1,1:30],acorr,'histc');
-    xlim(handles.autocorr,[-30,30]);
+    acorr(30+1) = 0; % zero out the total number of spikes
+    bar(handles.autocorr,-30:30,acorr,'hist');
+    xlim(handles.autocorr,[-31,31]);
     h = findobj(handles.autocorr,'Type','line');
     set(h,'Marker','none'); 
 end
