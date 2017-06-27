@@ -43,6 +43,10 @@ function loadSTA(fig)
     handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
     handles.currDP = findobj(stafig,'Tag','currentdatapoint');
     handles.autocorr = findobj(stafig,'Tag','autocorr');
+    handles.spikenumber = findobj(stafig,'Tag','spikenumber');
+    handles.spikefrequency = findobj(stafig,'Tag','spikefrequency');
+    handles.spikemin = findobj(stafig,'Tag','spikemin');
+    handles.spikemax = findobj(stafig,'Tag','spikemax');
     set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
     hold(handles.axes1,'all');

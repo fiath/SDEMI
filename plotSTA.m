@@ -10,8 +10,8 @@ function plotSTA(fig,unit)
     data = handles.data(:,:,unit);
     ax = handles.axes1;
     cla(ax);
-    min_v = min(data(:));
-    max_v = max(data(:));
+    [min_v,min_index] = min(data(:));
+    [max_v,max_index] = max(data(:));
     rangeX = size(data,2)-1;
     rangeY = max([abs(max_v),abs(min_v)])*2*1.1;
     c = handles.column;
@@ -39,15 +39,31 @@ function plotSTA(fig,unit)
     
     [~,min_pos] = min(min(data));
     plotHeatmap(fig,min_pos);
+   
     
     % plot autocorrelation
+    numOfBins = 30;
+    binSize =20;
     evFilePath = handles.unitNames{handles.unit};
     evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
-    acorr = loadAutoCorr(evFilePath,20,30);
-    acorr(30+1) = 0; % zero out the total number of spikes
-    bar(handles.autocorr,-30:30,acorr,'hist');
-    xlim(handles.autocorr,[-31,31]);
+    acorr = loadAutoCorr(evFilePath,binSize,numOfBins);
+    numOfSpikes = acorr(numOfBins+1);
+    acorr(numOfBins+1) = 0; % zero out the total number of spikes
+    bar(handles.autocorr,-numOfBins:numOfBins,acorr,'hist');
+    % dont put space because [-1 - 1] is NOT [-2] but [-1, -1]
+    xlim(handles.autocorr,[-numOfBins-1,numOfBins+1]);
     h = findobj(handles.autocorr,'Type','line');
     set(h,'Marker','none'); 
+    
+    %output information
+    traceHandles = guidata(handles.rawfig);
+    % lenght of the recording in seconds
+    time = traceHandles.datafile.length/traceHandles.datafile.samplingRate;
+    set(handles.spikenumber,'String',['Number of spikes: ',num2str(numOfSpikes)]);
+    set(handles.spikefrequency,'String',['Spiking frequency: ',num2str(numOfSpikes/time),'Hz']);
+    [~,min_index] = ind2sub(size(data),min_index);
+    [~,max_index] = ind2sub(size(data),max_index);
+    set(handles.spikemax,'String',['Maximum: ',num2str(max_v),' at ',num2str(max_index)]);
+    set(handles.spikemin,'String',['Minimum: ',num2str(min_v),' at ',num2str(min_index)]);
 end
 
