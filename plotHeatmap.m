@@ -38,6 +38,7 @@ function success = plotHeatmap( fig, position )
     
     guidata(fig,handles);
     updateLinePosition(fig);
+    updateDatapointTextBoxes(fig);
 end
 
 function updateLinePosition(fig)

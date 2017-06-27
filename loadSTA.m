@@ -40,6 +40,9 @@ function loadSTA(fig)
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
     handles.globalSave = findobj(stafig,'Tag','save');
+    handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
+    handles.currDP = findobj(stafig,'Tag','currentdatapoint');
+    set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
     hold(handles.axes1,'all');
     handles.heatCtxMenu = uicontextmenu(handles.stafig);
@@ -72,6 +75,7 @@ function loadSTA(fig)
     set(handles.dropDown,'Callback',@dropdownHandler);
     guidata(stafig,handles);
     set(handles.dropDown,'Value',1);
+    set(handles.totalDP,'String',['/ ',num2str(size(handles.data,2))]);
     plotSTA(stafig,1);
 end
 
@@ -94,14 +98,27 @@ function resizeHandler(hObject,~,~)
     % reposition dropdown menu
     handles = guidata(hObject);
     
+    axPos = get(handles.axes1,'Position');
+    figPos = get(handles.stafig,'Position');
+    
     pos = get(handles.dropDown,'Position');
     width = pos(3);
     height = pos(4);
-    axPos = get(handles.axes1,'Position');
-    figPos = get(handles.stafig,'Position');
     top = (axPos(2) + axPos(4))*figPos(4);
     center = (axPos(1) + axPos(3)/2)*figPos(3);
     set(handles.dropDown,'Position',[center - width/2,top + 5,width,height]);
+    
+    
+    % reposition datapoint windows (currDP, totalDP)
+    hPos =  get(handles.heatmap,'Position');
+    currPos = get(handles.currDP,'Position');
+    totPos = get(handles.totalDP,'Position');
+    cw = currPos(3);
+    ch = currPos(4);
+    hTop = (hPos(2) + hPos(4))*figPos(4);
+    hCenter = (hPos(1) + hPos(3)/2)*figPos(3);
+    set(handles.currDP,'Position',[hCenter - cw,hTop + 5,cw,ch]);
+    set(handles.totalDP,'Position',[hCenter + 8,hTop + 9,totPos(3:4)]);
 end
 
 function scrollHandler(hObject,eventdata,~)
