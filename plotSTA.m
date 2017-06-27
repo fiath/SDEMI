@@ -39,5 +39,14 @@ function plotSTA(fig,unit)
     
     [~,min_pos] = min(min(data));
     plotHeatmap(fig,min_pos);
+    
+    % plot autocorrelation
+    evFilePath = handles.unitNames{handles.unit};
+    evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
+    acorr = loadAutoCorr(evFilePath,20,30);
+    bar(handles.autocorr,[-30:-1,1:30],acorr,'histc');
+    xlim(handles.autocorr,[-30,30]);
+    h = findobj(handles.autocorr,'Type','line');
+    set(h,'Marker','none'); 
 end
 

@@ -42,6 +42,7 @@ function loadSTA(fig)
     handles.globalSave = findobj(stafig,'Tag','save');
     handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
     handles.currDP = findobj(stafig,'Tag','currentdatapoint');
+    handles.autocorr = findobj(stafig,'Tag','autocorr');
     set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
     hold(handles.axes1,'all');
@@ -57,6 +58,7 @@ function loadSTA(fig)
     % read data
     handles.data = [];
     handles.unit = -1;
+    handles.dirpath = dirpath;
     name = dataList(1).name;
     suffix = name(length(strtok(name,'.'))+1:length(name));
     ids = zeros(1,length(dataList));
