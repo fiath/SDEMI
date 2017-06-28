@@ -71,6 +71,11 @@ function window = checkDataWindow(datafile,window)
         beginBuffer = datafile.length - datafile.bufferSize;
     end
     datafile.buffer = 0.195*int32(datafile.file.Data.x(:,beginBuffer+1:endBuffer))';
+    % if filter is active carry out high-pass filtering
+    if datafile.filter.on
+        datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
+                                    datafile.buffer,[],2);
+    end
     next_active_offset = 1;
     for i=1:datafile.numberOfChannels
         if datafile.activeChannels(i)

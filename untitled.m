@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 26-Jun-2017 09:22:05
+% Last Modified by GUIDE v2.5 28-Jun-2017 18:20:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -65,6 +65,7 @@ set(handles.figure1,'WindowKeyReleaseFcn',@keyupHandler);
 set(handles.figure1,'CloseRequestFcn',@closeHandler);
 set(handles.edit1,'Callback',@channelRangeEditHandler);
 set(handles.positionEditText,'Callback',@positionEditHandler);
+set(handles.filtertoggleview,'Callback',@filterToggleHandler);
 handles.stafig = gobjects;
 
 handles.datafile = struct(  'numberOfChannels',128,...
@@ -90,6 +91,11 @@ handles.datafile = struct(  'numberOfChannels',128,...
                     'newBufferStart',-1,...
                     'newBufferEnd',-1,...
                     'ylim',[0,30000],...
+                    'filter',struct('order',3,...
+                                    'frequency',0.05,...
+                                    'on',0,...
+                                    'B',[],...
+                                    'A',[]),...
                     'centerString','',...
                     'pivotLine',gobjects,...
                     'timeFormat','%dh%dm%d.%03ds',...
@@ -97,6 +103,11 @@ handles.datafile = struct(  'numberOfChannels',128,...
 
 handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.datLoaded = 0;
+[B,A] = butter(handles.datafile.filter.order,...
+                handles.datafile.filter.frequency,'high');
+handles.datafile.filter.A = A;
+handles.datafile.filter.B = B;
+
 
 % Update handles structure
 guidata(hObject, handles);
@@ -136,7 +147,7 @@ function keyupHandler(hObject, eventdata, handles)
     guidata(hObject, handles);
 
 function mousemoveHandler(hObject, eventdata, handles)
-    fprintf('MouseMoveEvent\n');
+    %fprintf('MouseMoveEvent\n');
     updateTooltip(hObject);
 
 function closeHandler(hObject,eventdata)
@@ -368,3 +379,19 @@ function positionEditText_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in filtertoggleview.
+function filtertoggleview_Callback(hObject, eventdata, handles)
+% hObject    handle to filtertoggleview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of filtertoggleview
+
+
+% --- Executes on button press in filterchangeview.
+function filterchangeview_Callback(hObject, eventdata, handles)
+% hObject    handle to filterchangeview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

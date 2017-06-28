@@ -1,5 +1,5 @@
 function resizeHandler(hObject,~,~)
-    fprintf('ResizeHandler called\n');
+    %fprintf('ResizeHandler called\n');
     handles = guidata(hObject);
     if handles.datLoaded == 0
         return
@@ -10,6 +10,7 @@ function resizeHandler(hObject,~,~)
     figPos = get(handles.figure1,'Position');
     top = (axPos(2) + axPos(4))*figPos(4);
     left = axPos(1)*figPos(3);
+    right = (axPos(1)+axPos(3))*figPos(3);
     Hcenter = (axPos(1) + axPos(3)/2)*figPos(3);
     Vcenter = (axPos(2) + axPos(4)/2)*figPos(4);
     % position channel selector text box
@@ -23,6 +24,12 @@ function resizeHandler(hObject,~,~)
     width = pos(3);
     height = pos(4);
     set(handles.positionEditText,'Position',[Hcenter - width/2,top + 10,width,height]);
+    
+    % position filter view
+    pos = get(handles.filterPanel,'Position');
+    width = pos(3);
+    height = pos(4);
+    set(handles.filterPanel,'Position',[right + 20,top-height,width,height]);
     
     % 
     updateTooltip(hObject);
