@@ -66,6 +66,7 @@ set(handles.figure1,'CloseRequestFcn',@closeHandler);
 set(handles.edit1,'Callback',@channelRangeEditHandler);
 set(handles.positionEditText,'Callback',@positionEditHandler);
 set(handles.filtertoggleview,'Callback',@filterToggleHandler);
+set(handles.filterchangeview,'Callback',@changeFilterHandler);
 handles.stafig = gobjects;
 
 handles.datafile = struct(  'numberOfChannels',128,...
