@@ -12,7 +12,7 @@ function datafile = updateWindow(handles,newWindow,force)
 %         axes(handles.axes1);
 %         cla
         set(ax,'YLim',datafile.ylim);
-        set(ax,'XLim',[newWindow(1),newWindow(2)]);
+        set(ax,'XLim',[newWindow(1)/datafile.samplingRate,newWindow(2)/datafile.samplingRate]);
         datafile.dataWindow = newWindow;
         datafile.centerString = timeToString(round((datafile.dataWindow(1) + ...
             datafile.dataWindow(2))/2*1000/datafile.samplingRate),...
@@ -20,10 +20,11 @@ function datafile = updateWindow(handles,newWindow,force)
         set(handles.positionEditText,'String',datafile.centerString);
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1);
         
+        % we don't need pivotline
         % update pivot line
-        center = round((datafile.dataWindow(1) + datafile.dataWindow(2))/2);
-        delete(datafile.pivotLine);
-        datafile.pivotLine = line(ax,[center,center],get(ax,'YLim'));
+        %center = round((datafile.dataWindow(1) + datafile.dataWindow(2))/2/datafile.samplingRate);
+        %delete(datafile.pivotLine);
+        %datafile.pivotLine = line(ax,[center,center],get(ax,'YLim'));
         
 
 function window = checkDataWindow(datafile,window)
@@ -84,7 +85,7 @@ function window = checkDataWindow(datafile,window)
         end
     end
     cla(ax);
-    x = linspace(beginBuffer,endBuffer,size(datafile.buffer,1));
+    x = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,1));
     for i=1:datafile.numberOfChannels
          if ~datafile.activeChannels(i)
              continue;

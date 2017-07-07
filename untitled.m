@@ -100,7 +100,8 @@ handles.datafile = struct(  'numberOfChannels',128,...
                     'centerString','',...
                     'pivotLine',gobjects,...
                     'timeFormat','%dh%dm%d.%03ds',...
-                    'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt));
+                    'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt,'active',0),...
+                    'loadingSTA',0);
 
 handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.datLoaded = 0;
@@ -355,8 +356,15 @@ function waveformview_Callback(hObject, eventdata, handles)
 % hObject    handle to waveformview (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    fprintf('Waveform open start\n');
     handles = guidata(hObject);
+    handles.datafile.loadingSTA = 1;
+    guidata(handles.figure1,handles);
     loadSTA(handles.figure1);
+    handles = guidata(hObject);
+    handles.datafile.loadingSTA = 0;
+    guidata(handles.figure1,handles);
+    fprintf('Waveform open end\n');
 
 
 

@@ -21,7 +21,7 @@ function plotSTA(fig,unit)
             if (i-1)*c + j <= size(data,1)
                 offsetX = (j-1)*rangeX;
                 offsetY = (r-i)*rangeY;
-                plot(ax,offsetX:1:(offsetX+rangeX),data((i-1)*c+j,:) + offsetY + rangeY/2,'Color','black');
+                plot(ax,offsetX:1:(offsetX+rangeX),data((i-1)*c+j,:) + offsetY + rangeY/2,'Color','red','LineWidth',1);
                 hold(ax,'on');
             end
         end
@@ -33,6 +33,7 @@ function plotSTA(fig,unit)
     grid(ax,'on');
     set(ax,'XLim',[0,c*rangeX]);
     set(ax,'YLim',[0,r*rangeY]);
+    set(ax,'TickLength',[ 0 0 ])
     handles.unit = unit;
     set(handles.dropDown,'Value',unit);
     guidata(fig,handles);

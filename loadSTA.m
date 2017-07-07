@@ -25,7 +25,7 @@ function loadSTA(fig)
     % set up gui
     stafig = matlab.hg.internal.openfigLegacy('sta', 'reuse', 'visible');
     set(stafig,'CloseRequestFcn',@closeHandler);
-    set(stafig,'ResizeFcn',@resizeHandler);
+    set(stafig,'ResizeFcn',@staResizeHandler);
     set(stafig,'WindowScrollWheelFcn',@scrollHandler);
     set(stafig,'WindowButtonDownFcn',@stafigButtonDownHandler);
     set(stafig,'WindowButtonMotionFcn',@stafigMouseMoveHandler);
@@ -39,10 +39,12 @@ function loadSTA(fig)
     handles.lines = gobjects(1,handles.column);
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
+    handles.heatmapOriginalPosition = get(handles.heatmap,'Position');
     handles.globalSave = findobj(stafig,'Tag','save');
     handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
     handles.currDP = findobj(stafig,'Tag','currentdatapoint');
     handles.autocorr = findobj(stafig,'Tag','autocorr');
+    handles.infopanel = findobj(stafig,'Tag','infopanel');
     handles.spikenumber = findobj(stafig,'Tag','spikenumber');
     handles.spikefrequency = findobj(stafig,'Tag','spikefrequency');
     handles.spikemin = findobj(stafig,'Tag','spikemin');
@@ -63,17 +65,22 @@ function loadSTA(fig)
     handles.data = [];
     handles.unit = -1;
     handles.dirpath = dirpath;
-    name = dataList(1).name;
-    suffix = name(length(strtok(name,'.'))+1:length(name));
-    ids = zeros(1,length(dataList));
-    for i=1:length(dataList)
-        ids(i) = str2double(strtok(dataList(i).name,'.'));
+    suffix = '.ev2.mat';
+    ids = cell(length(dataList),2);
+    regex = '.*([^0-9]|^)(?<id>[0-9]+)\.ev2\.mat$';
+    for i=1:length(ids)
+        ids{i,1} = dataList(i).name;
+        m = regexp(ids{i,1},regex,'names');
+        if isempty(m)
+            error('.mat file is of invalid form');
+        end
+        ids{i,2} = str2double(m.id);
     end
-    ids = sort(ids);
+    ids = sortrows(ids,2);
     handles.unitNames = cell(1,length(dataList));
     for i = 1:length(ids)
-       data = load([dirpath num2str(ids(i)) suffix]);
-       handles.unitNames{i} = [num2str(ids(i)) suffix];
+       data = load([dirpath ids{i,1}]);
+       handles.unitNames{i} = ids{i,1};
        handles.data = cat(3,handles.data,data.meanSpikeWaveformDetrended);
     end
     handles.dropDown = findobj(stafig,'Tag','unitselector');
@@ -98,33 +105,6 @@ end
 function dropdownHandler(hObject,~,~)
     handles = guidata(hObject);
     plotSTA(handles.stafig,get(hObject,'Value'));
-end
-
-function resizeHandler(hObject,~,~)
-    % reposition dropdown menu
-    handles = guidata(hObject);
-    
-    axPos = get(handles.axes1,'Position');
-    figPos = get(handles.stafig,'Position');
-    
-    pos = get(handles.dropDown,'Position');
-    width = pos(3);
-    height = pos(4);
-    top = (axPos(2) + axPos(4))*figPos(4);
-    center = (axPos(1) + axPos(3)/2)*figPos(3);
-    set(handles.dropDown,'Position',[center - width/2,top + 5,width,height]);
-    
-    
-    % reposition datapoint windows (currDP, totalDP)
-    hPos =  get(handles.heatmap,'Position');
-    currPos = get(handles.currDP,'Position');
-    totPos = get(handles.totalDP,'Position');
-    cw = currPos(3);
-    ch = currPos(4);
-    hTop = (hPos(2) + hPos(4))*figPos(4);
-    hCenter = (hPos(1) + hPos(3)/2)*figPos(3);
-    set(handles.currDP,'Position',[hCenter - cw,hTop + 5,cw,ch]);
-    set(handles.totalDP,'Position',[hCenter + 8,hTop + 9,totPos(3:4)]);
 end
 
 function scrollHandler(hObject,eventdata,~)

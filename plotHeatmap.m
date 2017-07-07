@@ -33,7 +33,9 @@ function success = plotHeatmap( fig, position )
         set(h,'alphadata',~isnan(hm_data));
     end
     caxis(handles.heatmap,[-max_abs_v,max_abs_v]);
-    C = colorbar(handles.heatmap);
+    % heatmapOriginalPosition
+    pos = handles.heatmapOriginalPosition;
+    C = colorbar(handles.heatmap,'location','manual','Position',[pos(1)+pos(3)+.01 pos(2) .01 pos(4)]);
     C.UIContextMenu = '';
     
     guidata(fig,handles);
@@ -46,7 +48,7 @@ function updateLinePosition(fig)
     for i=1:size(handles.lines,2)
         delete(handles.lines(i));
         Xpos  = (i-1)*(size(handles.data,2)-1) + (handles.position-1);
-        handles.lines(i) = line(handles.axes1,[Xpos,Xpos],get(handles.axes1,'YLim'),'Color','red');
+        handles.lines(i) = line(handles.axes1,[Xpos,Xpos],get(handles.axes1,'YLim'),'Color','black');
     end
     guidata(fig,handles);
 end
