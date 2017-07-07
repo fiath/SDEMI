@@ -76,6 +76,10 @@ function window = checkDataWindow(datafile,window)
     if datafile.filter.on
         datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
                                     datafile.buffer,[],2);
+        datafile.buffer = fliplr(datafile.buffer);
+        datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
+                                    datafile.buffer,[],2);
+        datafile.buffer = fliplr(datafile.buffer);
     end
     next_active_offset = 1;
     for i=1:datafile.numberOfChannels
