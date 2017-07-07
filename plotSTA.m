@@ -42,19 +42,8 @@ function plotSTA(fig,unit)
     plotHeatmap(fig,min_pos);
    
     
-    % plot autocorrelation
-    numOfBins = 30;
-    binSize =20;
-    evFilePath = handles.unitNames{handles.unit};
-    evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
-    acorr = loadAutoCorr(evFilePath,binSize,numOfBins);
-    numOfSpikes = acorr(numOfBins+1);
-    acorr(numOfBins+1) = 0; % zero out the total number of spikes
-    bar(handles.autocorr,-numOfBins:numOfBins,acorr,'hist');
-    % dont put space because [-1 - 1] is NOT [-2] but [-1, -1]
-    xlim(handles.autocorr,[-numOfBins-1,numOfBins+1]);
-    h = findobj(handles.autocorr,'Type','line');
-    set(h,'Marker','none'); 
+    % plot autocorrelation 30 ms and 1ms binSize by default
+    numOfSpikes = plotAutoCorr(fig,30,handles.samplingRate/1000);
     
     %output information
     traceHandles = guidata(handles.rawfig);

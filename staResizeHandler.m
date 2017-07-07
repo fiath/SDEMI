@@ -25,15 +25,23 @@ function staResizeHandler(hObject,~,~)
     set(handles.totalDP,'Position',[hCenter + 8,hTop + 9,totPos(3:4)]);
     
     % reposition info view
-    infoL = (hPos(1) + hPos(3))*figPos(3) + 100 + 0.05*figPos(3);
+    infoL = (hPos(1) + hPos(3))*figPos(3) + 100;
     infoT = hTop;
     infoPos = get(handles.infopanel,'Position');
     set(handles.infopanel,'Position',[infoL,infoT-infoPos(4),infoPos(3),infoPos(4)]);
     
     % reposition autocorr
     corrL = infoL;
-    corrB = hPos(2)*figPos(4);
+    corrT = infoT - infoPos(4) - 30;
     %corrH = hPos(4)*figPos(4) - infoPos(4) - 30;
     corrPos = get(handles.autocorr,'Position');
-    set(handles.autocorr,'Position',[corrL,corrB,corrPos(3),corrPos(4)]);
+    corrPos(3) = figPos(3) - corrL - 0.05*figPos(3);
+    corrPos(4) = corrT - 0.05*figPos(4);
+    set(handles.autocorr,'Position',[corrL,corrT - corrPos(4),corrPos(3),corrPos(4)]);
+    
+    % reposition autocorrelogram info block
+    corrinfL = infoL + infoPos(3) + 20;
+    corrinfB = infoT - infoPos(4);
+    corrinfPos = get(handles.autocorrInf,'Position');
+    set(handles.autocorrInf,'Position',[corrinfL,corrinfB,corrinfPos(3:4)])
 end

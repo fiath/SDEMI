@@ -49,10 +49,14 @@ function loadSTA(fig)
     set(stafig,'WindowKeyPressFcn',@staKeydownHandler);
     handles.stafig = stafig;
     set(handles.traceview,'Enable','off');
+    samplingRate = handles.datafile.samplingRate;
     guidata(fig,handles);
     handles = struct('rawfig',fig);
     handles.stafig = stafig;
+    handles.samplingRate = samplingRate;
     handles.column = answer;
+    %handles.autoCorrBinSize = 20;
+    %handles.autoCorrRange = 30;
     handles.lines = gobjects(1,handles.column);
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
@@ -61,6 +65,10 @@ function loadSTA(fig)
     handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
     handles.currDP = findobj(stafig,'Tag','currentdatapoint');
     handles.autocorr = findobj(stafig,'Tag','autocorr');
+    handles.autocorrInf = findobj(stafig,'Tag','autocorrinf');
+    handles.autocorrChange = findobj(stafig,'Tag','autocorrchange');
+    handles.autocorrbinsize = findobj(stafig,'Tag','autocorrbinsize');
+    handles.autocorrrange = findobj(stafig,'Tag','autocorrrange');
     handles.infopanel = findobj(stafig,'Tag','infopanel');
     handles.spikenumber = findobj(stafig,'Tag','spikenumber');
     handles.spikefrequency = findobj(stafig,'Tag','spikefrequency');
@@ -103,6 +111,7 @@ function loadSTA(fig)
     handles.dropDown = findobj(stafig,'Tag','unitselector');
     set(handles.dropDown,'String',handles.unitNames);
     set(handles.dropDown,'Callback',@dropdownHandler);
+    set(handles.autocorrChange,'Callback',@autocorrChangeHandler);
     guidata(stafig,handles);
     set(handles.dropDown,'Value',1);
     set(handles.totalDP,'String',['/ ',num2str(size(handles.data,2))]);
