@@ -3,6 +3,23 @@ function loadSTA(fig)
 %   Detailed explanation goes here
 
     handles = guidata(fig);
+    
+    answer = inputdlg({'Number of colummns: '},...
+                            'Columns',1,{'4'});
+    if isempty(answer)
+        % user cancelled
+        return;
+    end
+    answer = str2double(answer);
+    if isnan(answer)
+        % invalid input
+        return;
+    end
+    answer = floor(abs(answer));
+    if answer < 1 || answer > 6
+        % invalid input
+        return;
+    end
 
     startdir = handles.datafile.filedir(1:end-1);
     startdir = startdir(1:find(startdir=='/',1,'last')-1);
@@ -35,7 +52,7 @@ function loadSTA(fig)
     guidata(fig,handles);
     handles = struct('rawfig',fig);
     handles.stafig = stafig;
-    handles.column = 4;
+    handles.column = answer;
     handles.lines = gobjects(1,handles.column);
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
