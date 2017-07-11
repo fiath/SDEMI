@@ -81,9 +81,10 @@ handles.datafile = struct(  'numberOfChannels',128,...
                     'bufferStart',0,...
                     'bufferEnd',0,...
                     'buffer',[],... % #datapoints * 128
-                    'loadStart',50000,... % if center of window is smaller than this
-                    'loadEnd',150000,... % if center of window is larger than this
+                    'loadStart',0.25,... % if center of window is smaller than this
+                    'loadEnd',0.75,... % if center of window is larger than this
                     'bufferSize',-1,... % the size of the buffer
+                    'windowUpdating',0,...
                     'maxBufferSize',200000,... % in datapoints
                     'dataWindow',[0,0],...
                     'windowSize',-1,...
@@ -106,6 +107,8 @@ handles.datafile = struct(  'numberOfChannels',128,...
                     'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt,'active',0),...
                     'loadingSTA',0);
 
+set(handles.axes1,'YLimMode','manual');
+set(handles.axes1,'XLimMode','manual');
 handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
 handles.datLoaded = 0;
 [B,A] = butter(handles.datafile.filter.order,...
@@ -150,6 +153,10 @@ function keyupHandler(hObject, eventdata, handles)
         handles.modifiers.alt = 0;
     end
     guidata(hObject, handles);
+    if strcmp(eventdata.Key,'f5')
+        handles.datafile = updateWindow(handles,handles.datafile.dataWindow,true);
+        guidata(hObject,handles);
+    end
 
 function mousemoveHandler(hObject, eventdata, handles)
     %fprintf('MouseMoveEvent\n');

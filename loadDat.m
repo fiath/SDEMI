@@ -19,7 +19,7 @@ function loadDat(fig)
     datafile.filedir = path;
     datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
     % the whole file is loaded at once
-    datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
+    %datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
     datafile.file = memmapfile(filepath, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
     datafile.channelLines = gobjects(datafile.numberOfChannels,1);
     datafile.channelIds = gobjects(datafile.numberOfChannels,1);
@@ -38,7 +38,7 @@ function loadDat(fig)
     ax = handles.axes1;
     set(ax,'YLim',handles.datafile.ylim);
     %ax.Clipping = 'off';
-    handles.datafile = updateWindow(handles,[0,100000]);
+    handles.datafile = updateWindow(handles,[0,100000-1]);
     updateIdPositions(handles);
     handles.datLoaded = 1;
     
