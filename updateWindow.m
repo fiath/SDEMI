@@ -11,6 +11,7 @@ function datafile = updateWindow(handles,newWindow,force)
         fprintf('Start: %d, End: %d\n',startWindow,endWindow);
 %         axes(handles.axes1);
 %         cla
+        datafile.ylim = CheckYLim(datafile.ylim,datafile);
         set(ax,'YLim',datafile.ylim);
         set(ax,'XLim',[newWindow(1)/datafile.samplingRate,newWindow(2)/datafile.samplingRate]);
         datafile.dataWindow = newWindow;
@@ -84,7 +85,7 @@ function window = checkDataWindow(datafile,window)
     next_active_offset = 1;
     for i=1:datafile.numberOfChannels
         if datafile.activeChannels(i)
-            datafile.buffer(:,i) = datafile.buffer(:,i) + next_active_offset*1000;
+            datafile.buffer(:,i) = datafile.buffer(:,i) + next_active_offset*datafile.channelSpacing;
             next_active_offset = next_active_offset + 1;
         end
     end
@@ -98,8 +99,21 @@ function window = checkDataWindow(datafile,window)
         set(datafile.channelLines(i),'ButtonDownFcn',{@onchannelclickHandler,i});
         hold on;
     end
+    % place whole lines at each second and dashed lines at each 200ms mark
+    wholeLinePos = floor(beginBuffer/datafile.samplingRate):ceil(endBuffer/datafile.samplingRate);
+    dashedLinePos = floor(beginBuffer/datafile.samplingRate):0.2:ceil(endBuffer/datafile.samplingRate);
+    for i=1:length(dashedLinePos)
+        line(ax,[dashedLinePos(i),dashedLinePos(i)],...
+                [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
+                (next_active_offset-1)*datafile.channelSpacing],'Color',[0.2 0.2 0.2],'LineStyle','--');
+    end
+    for i=1:length(wholeLinePos)
+        line(ax,[wholeLinePos(i),wholeLinePos(i)],...
+                [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
+                (next_active_offset-1)*datafile.channelSpacing],'Color',[0 0 0]);
+    end
     set(ax,'YTickLabel',[]);
-    yticks((1:(next_active_offset-1))*1000);
+    yticks((1:(next_active_offset-1))*datafile.channelSpacing);
 %     ax = gca;
     datafile.bufferStart = beginBuffer;
     datafile.bufferEnd = endBuffer;

@@ -22,7 +22,7 @@ function scrollHandler(hObject, eventdata, handles)
                 end
                 YLim = [center - floor(ySize/2),center + ceil(ySize/2)];
             end
-            handles.datafile.ylim = YLim;
+            handles.datafile.ylim = CheckYLim(YLim,handles.datafile);
             set(handles.axes1,'YLim',handles.datafile.ylim);
             
             % update pivot line

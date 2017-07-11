@@ -38,7 +38,7 @@ function loadDat(fig)
     ax = handles.axes1;
     set(ax,'YLim',handles.datafile.ylim);
     %ax.Clipping = 'off';
-    handles.datafile = updateWindow(handles,[0,1000]);
+    handles.datafile = updateWindow(handles,[0,100000]);
     updateIdPositions(handles);
     handles.datLoaded = 1;
     
