@@ -1,7 +1,7 @@
 function updateTooltip(hObject)
 %UPDATETOOLTIP Summary of this function goes here
 %   Detailed explanation goes here
-    fprintf('Update tooltip start\n');
+    %fprintf('Update tooltip start\n');
     handles = guidata(hObject);
     if handles.datafile.loadingSTA
         return;
@@ -37,6 +37,6 @@ function updateTooltip(hObject)
     end
     
     guidata(hObject,handles);
-    fprintf('Update tooltip end\n');
+    %fprintf('Update tooltip end\n');
 end
 

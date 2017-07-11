@@ -37,6 +37,7 @@ function scrollHandler(hObject, eventdata, handles)
                 else
                     window = window - floor(handles.datafile.windowSize/20);
                 end
+                handles.datafile = updateWindow(handles,window);
             else
                 center = floor((window(1) + window(2))/2);
                 if eventdata.VerticalScrollCount > 0 
@@ -46,8 +47,12 @@ function scrollHandler(hObject, eventdata, handles)
                 end
                 window = [center - floor(handles.datafile.windowSize/2),...
                           center + ceil(handles.datafile.windowSize/2)];
+                if ResolutionChanged(handles,window)
+                    handles.datafile = updateWindow(handles,window,true);
+                else
+                    handles.datafile = updateWindow(handles,window);
+                end
             end
-            handles.datafile = updateWindow(handles,window);
         end
         updateIdPositions(handles);
         guidata(hObject, handles);
