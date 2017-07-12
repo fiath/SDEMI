@@ -1,28 +1,39 @@
 % binsize in datapoints (1ms)
 % bins, number of bins on each side (>= 0)
-function autocorr = loadAutoCorr(filepath,binsize,numOfBins)
+function autocorr = loadAutoCorr(fig,filepath,binsize,numOfBins)
 %LOADAUTOCORR Summary of this function goes here
 %   Detailed explanation goes here
-    f = fopen(filepath,'r');
+    handles = guidata(fig);
+    if isKey(handles.eventFiles,filepath)
+        % event file has already been loaded
+        spikes = handles.eventFiles(filepath);
+    else
+        f = fopen(filepath,'r');
+        spikes = [];
+        l = fgetl(f);
+        while ischar(l)
+            dp = sscanf(l,'%d %d %d %d %f %d');
+            spikes = [spikes,dp(6)];
+            l = fgetl(f);
+        end
+        fclose(f);
+        handles.eventFiles(filepath) = spikes;
+        guidata(fig,handles);
+    end
 
     autocorr = zeros(1,2*numOfBins+1);
-    spikes = [];
-    l = fgetl(f);
-    while ischar(l)
-        dp = sscanf(l,'%d %d %d %d %f %d');
-        pos = dp(6);
-        spikes = spikes(spikes >= (pos - binsize*numOfBins));
-        dist = ceil((pos - spikes)/binsize);
+    activeSpikes = [];
+    for i=1:length(spikes)        
+        pos = spikes(i);
+        activeSpikes = activeSpikes(activeSpikes >= (pos - binsize*numOfBins));
+        dist = ceil((pos - activeSpikes)/binsize);
         if dist == 0
             error('Multiple spikes at the same time from the same neuron');
         end
         autocorr(numOfBins - dist + 1) = autocorr(numOfBins - dist + 1) + 1;
         autocorr(numOfBins + dist + 1) = autocorr(numOfBins + dist + 1) + 1;
         autocorr(numOfBins+1) = autocorr(numOfBins+1)+1; % add spike to 0 bin
-        spikes = [spikes,pos];
-        l = fgetl(f);
+        activeSpikes = [activeSpikes,pos];
     end
-    
-    fclose(f);
 end
 

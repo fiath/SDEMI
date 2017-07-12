@@ -55,8 +55,11 @@ function loadSTA(fig)
     handles.stafig = stafig;
     handles.samplingRate = samplingRate;
     handles.column = answer;
+    handles.eventFiles = containers.Map;
     %handles.autoCorrBinSize = 20;
     %handles.autoCorrRange = 30;
+    
+    % graphic objects
     handles.lines = gobjects(1,handles.column);
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
@@ -74,6 +77,7 @@ function loadSTA(fig)
     handles.spikefrequency = findobj(stafig,'Tag','spikefrequency');
     handles.spikemin = findobj(stafig,'Tag','spikemin');
     handles.spikemax = findobj(stafig,'Tag','spikemax');
+    
     set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
     hold(handles.axes1,'all');

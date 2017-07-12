@@ -5,7 +5,7 @@ function numOfSpikes = plotAutoCorr(fig,numOfBins,binSize)
     
     evFilePath = handles.unitNames{handles.unit};
     evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
-    acorr = loadAutoCorr(evFilePath,binSize,numOfBins);
+    acorr = loadAutoCorr(fig,evFilePath,binSize,numOfBins);
     numOfSpikes = acorr(numOfBins+1);
     acorr(numOfBins+1) = 0; % zero out the total number of spikes
     bar(handles.autocorr,(-numOfBins:numOfBins)*binSize*1000/handles.samplingRate,acorr,'hist');
