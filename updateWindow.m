@@ -1,10 +1,13 @@
 function datafile = updateWindow(handles,newWindow,force)
-        if handles.datafile.windowUpdating
-            datafile = handles.datafile;
-            return;
-        end
-        handles.datafile.windowUpdating = 1;
-        guidata(handles.figure1,handles);
+%         persistent lock;
+%         if lock
+%             datafile = handles.datafile;
+%         if handles.datafile.windowUpdating
+%             datafile = handles.datafile;
+%             return;
+%         end
+%         handles.datafile.windowUpdating = 1;
+%         guidata(handles.figure1,handles);
         if nargin < 3
             force = 0;
         end
@@ -75,8 +78,9 @@ function window = checkDataWindow(datafile,window)
             % we have no data after
             return
         end
+        break;
     end
-    drawnow;
+    %drawnow;
     tic;
     datafile.bufferSize = (newWindow(2)-newWindow(1)+1)*2;
     % center the buffer at center
@@ -90,22 +94,19 @@ function window = checkDataWindow(datafile,window)
         beginBuffer = datafile.length - datafile.bufferSize;
     end
     fprintf('Reading from %d to %d, a total of %d\n',beginBuffer+1,endBuffer,datafile.bufferSize);
-    datafile.buffer = 0.195*int32(datafile.file.Data.x(:,beginBuffer+1:endBuffer)).';
     % if filter is active carry out high-pass filtering
     if datafile.filter.on
+        datafile.buffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
+        
+        
         datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
-                                    datafile.buffer);
-        datafile.buffer = flipud(datafile.buffer);
+                                    datafile.buffer,[],2);
+        datafile.buffer = fliplr(datafile.buffer);
         datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
-                                    datafile.buffer);
-        datafile.buffer = flipud(datafile.buffer);
-    end
-    next_active_offset = 1;
-    for i=1:datafile.numberOfChannels
-        if datafile.activeChannels(i)
-            datafile.buffer(:,i) = datafile.buffer(:,i) + next_active_offset*datafile.channelSpacing;
-            next_active_offset = next_active_offset + 1;
-        end
+                                    datafile.buffer,[],2);
+        datafile.buffer = fliplr(datafile.buffer);
+    else
+        datafile.buffer = datafile.file.Data.x(:,beginBuffer+1:endBuffer);
     end
     % get size of ax in pixels
     fig = get(ax,'Parent');
@@ -117,30 +118,41 @@ function window = checkDataWindow(datafile,window)
     %dataPerPixel = 0;
     datafile.dataResolution = dataPerPixel;
     if dataPerPixel > 8
-        newBuffer = zeros(2*ceil(datafile.bufferSize/dataPerPixel),datafile.numberOfChannels);
-        for i=1:size(newBuffer,1)/2-1
-            for j=1:datafile.numberOfChannels
-                if datafile.activeChannels(j)
-                    newBuffer(i*2-1,j) = min(datafile.buffer((((i-1)*dataPerPixel)+1):(i*dataPerPixel),j));
-                    newBuffer(i*2,j) = max(datafile.buffer((((i-1)*dataPerPixel)+1):(i*dataPerPixel),j));
-                end
-            end
+        newBuffer = zeros(datafile.numberOfChannels,2*ceil(datafile.bufferSize/dataPerPixel));
+        for i=1:size(newBuffer,2)/2-1
+            newBuffer(:,(i*2-1)) = min(datafile.buffer(:,(((i-1)*dataPerPixel)+1):(i*dataPerPixel)),[],2);
+            newBuffer(:,(i*2)) = max(datafile.buffer(:,(((i-1)*dataPerPixel)+1):(i*dataPerPixel)),[],2);
         end
-        i = size(newBuffer,1)/2;
+        i = size(newBuffer,2)/2;
         for j=1:datafile.numberOfChannels
             if datafile.activeChannels(j)
-                newBuffer(i*2-1,j) = min(datafile.buffer((((i-1)*dataPerPixel)+1):end,j));
-                newBuffer(i*2,j) = max(datafile.buffer((((i-1)*dataPerPixel)+1):end,j));   
+                newBuffer(:,(i*2-1)) = min(datafile.buffer(:,(((i-1)*dataPerPixel)+1):end),[],2);
+                newBuffer(:,(i*2)) = max(datafile.buffer(:,(((i-1)*dataPerPixel)+1):end),[],2);
             end
         end
         datafile.buffer = newBuffer;
     end
-    cla(ax);
-    x = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,1));
+    
+    if ~datafile.filter.on
+        % it hasnt been scaled yet
+        datafile.buffer = 0.195*double(datafile.buffer);
+    end
+    
+    next_active_offset = 1;
+    for i=1:datafile.numberOfChannels
+        if datafile.activeChannels(i)
+            datafile.buffer(i,:) = datafile.buffer(i,:) + next_active_offset*datafile.channelSpacing;
+            next_active_offset = next_active_offset + 1;
+        end
+    end
+    
+    %cla(ax);
+    x = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,2));
 %     interX = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,1)*2/dataPerPixel);
     holdOnCalled = 0;
     for i=1:datafile.numberOfChannels
          if ~datafile.activeChannels(i)
+             set(datafile.channelLines(i),'Visible','off');
              continue;
          end
 %         if dataPerPixel > 8
@@ -149,24 +161,37 @@ function window = checkDataWindow(datafile,window)
 %         else
 %             datafile.channelLines(i) = plot(ax,x,datafile.buffer(:,i).','Color','black','hittest','off');
 %         end
-        datafile.channelLines(i) = plot(ax,x,datafile.buffer(:,i).','Color','black','hittest','off');
+        %datafile.channelLines(i) = plot(ax,x,datafile.buffer(i,:),'Color','black','hittest','off');
+        set(datafile.channelLines(i),'XData',x);
+        set(datafile.channelLines(i),'YData',datafile.buffer(i,:));
+        set(datafile.channelLines(i),'Visible','on');
         %set(datafile.channelLines(i),'ButtonDownFcn',{@onchannelclickHandler,i});
         % not neccessary for line
-        if holdOnCalled == 0
-            hold(ax,'on');
-            holdOnCalled = 1;
-        end
+%         if holdOnCalled == 0
+%             hold(ax,'on');
+%             holdOnCalled = 1;
+%         end
     end
     % place whole lines at each second and dashed lines at each 200ms mark
-    wholeLinePos = floor(beginBuffer/datafile.samplingRate):ceil(endBuffer/datafile.samplingRate);
+    solidLinePos = floor(beginBuffer/datafile.samplingRate):ceil(endBuffer/datafile.samplingRate);
     dashedLinePos = floor(beginBuffer/datafile.samplingRate):0.2:ceil(endBuffer/datafile.samplingRate);
+    % remove previous lines
+    for i=1:length(datafile.solidLines)
+        delete(datafile.solidLines(i));
+    end
+    for i=1:length(datafile.dashedLines)
+        delete(datafile.dashedLines(i));
+    end
+    % add new lines
+    datafile.dashedLines = gobjects(1,length(dashedLinePos));
     for i=1:length(dashedLinePos)
-        line(ax,[dashedLinePos(i),dashedLinePos(i)],...
+        datafile.dashedLines(i) = line(ax,[dashedLinePos(i),dashedLinePos(i)],...
                 [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
                 (next_active_offset-1)*datafile.channelSpacing],'Color',[0.2 0.2 0.2],'LineStyle','--','hittest','off');
     end
-    for i=1:length(wholeLinePos)
-        line(ax,[wholeLinePos(i),wholeLinePos(i)],...
+    datafile.solidLines = gobjects(1,length(solidLinePos));
+    for i=1:length(solidLinePos)
+        datafile.solidLines(i) = line(ax,[solidLinePos(i),solidLinePos(i)],...
                 [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
                 (next_active_offset-1)*datafile.channelSpacing],'Color',[0 0 0],'hittest','off');
     end
@@ -175,7 +200,7 @@ function window = checkDataWindow(datafile,window)
 %     ax = gca;
     datafile.bufferStart = beginBuffer;
     datafile.bufferEnd = endBuffer;
-    drawnow;
+    %drawnow;
     fprintf('Finished reading. ');toc
    
    

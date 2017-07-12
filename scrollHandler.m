@@ -58,6 +58,6 @@ function scrollHandler(hObject, eventdata, handles)
         updateIdPositions(handles);
         guidata(hObject, handles);
         updateTooltip(hObject);
-        drawnow;
+        %drawnow;
     end
 

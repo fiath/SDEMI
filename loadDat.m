@@ -22,6 +22,12 @@ function loadDat(fig)
     %datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
     datafile.file = memmapfile(filepath, 'Format',{'int16', [datafile.numberOfChannels datafile.length], 'x'});
     datafile.channelLines = gobjects(datafile.numberOfChannels,1);
+    % plot empty lines for each channel
+    for i=1:datafile.numberOfChannels
+        datafile.channelLines(i) = plot(handles.axes1,[nan],[nan],'Color','black','hittest','off');
+        hold(handles.axes1,'on');
+        set(datafile.channelLines(i),'Visible','off');
+    end
     datafile.channelIds = gobjects(datafile.numberOfChannels,1);
     datafile.activeChannels = ones(1,datafile.numberOfChannels);
     [datafile,success] = changeActiveChannels(datafile,'65');
