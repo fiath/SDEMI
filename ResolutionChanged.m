@@ -7,7 +7,7 @@ function resChanged = ResolutionChanged(handles,window)
     axPos = get(ax,'Position');
     xSize = axPos(3)*figPos(3);
     res = floor((window(2)-window(1)+1)/xSize);
-    if res >= handles.datafile.dataResolution
+    if res >= handles.datafile.dataResolution/2
         resChanged = false;
     else
         resChanged = true;

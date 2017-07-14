@@ -41,9 +41,9 @@ function resizeHandler(hObject,~,~)
     % 
     updateTooltip(hObject);
     
-    %if ResolutionChanged(handles,handles.datafile.dataWindow)
-    %    handles.datafile = updateWindow(handles,handles.datafile.dataWindow,true);
-    %    guidata(hObject,handles);
-    %end
+    if ResolutionChanged(handles,handles.datafile.dataWindow)
+       handles.datafile = updateWindow(handles,handles.datafile.dataWindow,true);
+       guidata(hObject,handles);
+    end
     
 
