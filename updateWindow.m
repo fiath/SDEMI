@@ -99,12 +99,7 @@ function window = checkDataWindow(datafile,window)
         datafile.buffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
         
         
-        datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
-                                    datafile.buffer,[],2);
-        datafile.buffer = fliplr(datafile.buffer);
-        datafile.buffer = filter(datafile.filter.B,datafile.filter.A,...
-                                    datafile.buffer,[],2);
-        datafile.buffer = fliplr(datafile.buffer);
+        datafile.buffer = filterBuffer(datafile,datafile.buffer);
     else
         datafile.buffer = datafile.file.Data.x(:,beginBuffer+1:endBuffer);
     end
@@ -118,19 +113,7 @@ function window = checkDataWindow(datafile,window)
     %dataPerPixel = 0;
     datafile.dataResolution = dataPerPixel;
     if dataPerPixel > 8
-        newBuffer = zeros(datafile.numberOfChannels,2*ceil(datafile.bufferSize/dataPerPixel));
-        for i=1:size(newBuffer,2)/2-1
-            newBuffer(:,(i*2-1)) = min(datafile.buffer(:,(((i-1)*dataPerPixel)+1):(i*dataPerPixel)),[],2);
-            newBuffer(:,(i*2)) = max(datafile.buffer(:,(((i-1)*dataPerPixel)+1):(i*dataPerPixel)),[],2);
-        end
-        i = size(newBuffer,2)/2;
-        for j=1:datafile.numberOfChannels
-            if datafile.activeChannels(j)
-                newBuffer(:,(i*2-1)) = min(datafile.buffer(:,(((i-1)*dataPerPixel)+1):end),[],2);
-                newBuffer(:,(i*2)) = max(datafile.buffer(:,(((i-1)*dataPerPixel)+1):end),[],2);
-            end
-        end
-        datafile.buffer = newBuffer;
+        datafile.buffer = downSampleBuffer(datafile,datafile.buffer);
     end
     
     if ~datafile.filter.on
@@ -146,32 +129,16 @@ function window = checkDataWindow(datafile,window)
         end
     end
     datafile.numOfActiveChannels = next_active_offset-1;
-    
-    %cla(ax);
+ 
     x = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,2));
-%     interX = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,1)*2/dataPerPixel);
-    holdOnCalled = 0;
     for i=1:datafile.numberOfChannels
-         if ~datafile.activeChannels(i)
-             set(datafile.channelLines(i),'Visible','off');
-             continue;
-         end
-%         if dataPerPixel > 8
-%             interY = interp1(x,double(datafile.buffer(:,i).'),interX);
-%             datafile.channelLines(i) = plot(ax,interX,interY,'Color','black','hittest','off');
-%         else
-%             datafile.channelLines(i) = plot(ax,x,datafile.buffer(:,i).','Color','black','hittest','off');
-%         end
-        %datafile.channelLines(i) = plot(ax,x,datafile.buffer(i,:),'Color','black','hittest','off');
+        if ~datafile.activeChannels(i)
+            set(datafile.channelLines(i),'Visible','off');
+            continue;
+        end
         set(datafile.channelLines(i),'XData',x);
         set(datafile.channelLines(i),'YData',datafile.buffer(i,:));
         set(datafile.channelLines(i),'Visible','on');
-        %set(datafile.channelLines(i),'ButtonDownFcn',{@onchannelclickHandler,i});
-        % not neccessary for line
-%         if holdOnCalled == 0
-%             hold(ax,'on');
-%             holdOnCalled = 1;
-%         end
     end
     % place whole lines at each second and dashed lines at each 200ms mark
     solidLinePos = floor(beginBuffer/datafile.samplingRate):ceil(endBuffer/datafile.samplingRate);
@@ -199,10 +166,9 @@ function window = checkDataWindow(datafile,window)
     
     set(ax,'YTickLabel',[]);
     yticks((1:datafile.numOfActiveChannels)*datafile.channelSpacing);
-%     ax = gca;
+
     datafile.bufferStart = beginBuffer;
     datafile.bufferEnd = endBuffer;
-    %drawnow;
     
     % update spikeLines
     datafile = updateSpikes(datafile);
