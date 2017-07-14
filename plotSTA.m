@@ -35,7 +35,9 @@ function plotSTA(fig,unit)
     set(ax,'YLim',[0,r*rangeY]);
     set(ax,'TickLength',[ 0 0 ])
     handles.unit = unit;
+    handles.crossCorrUnit = unit;
     set(handles.dropDown,'Value',unit);
+    set(handles.corrSelector,'Value',unit);
     guidata(fig,handles);
     
     [~,min_pos] = min(min(data));
@@ -43,7 +45,11 @@ function plotSTA(fig,unit)
    
     
     % plot autocorrelation 30 ms and 1ms binSize by default
-    numOfSpikes = plotAutoCorr(fig,30,handles.samplingRate/1000);
+    plotCrossCorr(fig,handles.numOfBins,handles.binSize,handles.unit);
+    
+    unitName = handles.unitNames{handles.unit};
+    evFilePath = [handles.dirpath,strtok(unitName,'.'),'.ev2'];
+    numOfSpikes = length(handles.eventFiles(evFilePath));
     
     %output information
     traceHandles = guidata(handles.rawfig);
@@ -55,5 +61,10 @@ function plotSTA(fig,unit)
     [~,max_index] = ind2sub(size(data),max_index);
     set(handles.spikemax,'String',['Maximum: ',num2str(max_v),' at ',num2str(max_index)]);
     set(handles.spikemin,'String',['Minimum: ',num2str(min_v),' at ',num2str(min_index)]);
+    
+    %update traceview's spikeLines
+    rawHandles = guidata(handles.rawfig);
+    rawHandles.datafile = updateSpikes(rawHandles.datafile);
+    guidata(handles.rawfig,rawHandles);
 end
 

@@ -15,8 +15,12 @@ function autocorrChangeHandler(hObject,~,~)
     
     % binsize must be greater than the resolution
     binsize = max([floor(binsize*handles.samplingRate/1000),1]);
-    numOfBins = min([max([range*handles.samplingRate/1000/binsize,1]),100]);
+    numOfBins = min([max([floor(range*handles.samplingRate/1000/binsize),1]),100]);
+    
+    handles.binSize = binsize;
+    handles.numOfBins = numOfBins;
+    guidata(hObject,handles);
 
-    plotAutoCorr(handles.stafig,numOfBins,binsize);
+    plotCrossCorr(handles.stafig,numOfBins,binsize,handles.unit);
 end
 

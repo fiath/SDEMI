@@ -55,6 +55,8 @@ function loadSTA(fig)
     handles.stafig = stafig;
     handles.samplingRate = samplingRate;
     handles.column = answer;
+    % <String,[Int]> maps the name of the file to the array of spike
+    % positions in datapoints
     handles.eventFiles = containers.Map;
     %handles.autoCorrBinSize = 20;
     %handles.autoCorrRange = 30;
@@ -67,6 +69,7 @@ function loadSTA(fig)
     handles.globalSave = findobj(stafig,'Tag','save');
     handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
     handles.currDP = findobj(stafig,'Tag','currentdatapoint');
+    handles.corrSelector = findobj(stafig,'Tag','crosscorrsel');
     handles.autocorr = findobj(stafig,'Tag','autocorr');
     handles.autocorrInf = findobj(stafig,'Tag','autocorrinf');
     handles.autocorrChange = findobj(stafig,'Tag','autocorrchange');
@@ -93,6 +96,9 @@ function loadSTA(fig)
     % read data
     handles.data = [];
     handles.unit = -1;
+    handles.crossCorrUnit = -1;
+    handles.binSize = 20;
+    handles.numOfBins = 30;
     handles.dirpath = dirpath;
     suffix = '.ev2.mat';
     ids = cell(length(dataList),2);
@@ -115,6 +121,8 @@ function loadSTA(fig)
     handles.dropDown = findobj(stafig,'Tag','unitselector');
     set(handles.dropDown,'String',handles.unitNames);
     set(handles.dropDown,'Callback',@dropdownHandler);
+    set(handles.corrSelector,'String',handles.unitNames);
+    set(handles.corrSelector,'Callback',@corrSelectorHandler);
     set(handles.autocorrChange,'Callback',@autocorrChangeHandler);
     guidata(stafig,handles);
     set(handles.dropDown,'Value',1);
@@ -125,11 +133,14 @@ end
 function closeHandler(hObject,~,~)
     handles = guidata(hObject);
     rawfig = handles.rawfig;
-    handles = guidata(rawfig);
-    handles.stafig = gobjects;
-    set(handles.traceview,'Enable','on');
-    guidata(rawfig,handles);
+    rawHandles = guidata(rawfig);
+    rawHandles.stafig = gobjects;
+    set(rawHandles.traceview,'Enable','on');
+    guidata(rawfig,rawHandles);
     delete(hObject);
+    rawHandles = guidata(rawfig);
+    rawHandles.datafile = updateSpikes(rawHandles.datafile);
+    guidata(rawfig,rawHandles);
 end
 
 function dropdownHandler(hObject,~,~)

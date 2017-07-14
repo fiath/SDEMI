@@ -145,6 +145,7 @@ function window = checkDataWindow(datafile,window)
             next_active_offset = next_active_offset + 1;
         end
     end
+    datafile.numOfActiveChannels = next_active_offset-1;
     
     %cla(ax);
     x = linspace(beginBuffer/datafile.samplingRate,endBuffer/datafile.samplingRate,size(datafile.buffer,2));
@@ -187,20 +188,24 @@ function window = checkDataWindow(datafile,window)
     for i=1:length(dashedLinePos)
         datafile.dashedLines(i) = line(ax,[dashedLinePos(i),dashedLinePos(i)],...
                 [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
-                (next_active_offset-1)*datafile.channelSpacing],'Color',[0.2 0.2 0.2],'LineStyle','--','hittest','off');
+                datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[0.2 0.2 0.2],'LineStyle','--','hittest','off');
     end
     datafile.solidLines = gobjects(1,length(solidLinePos));
     for i=1:length(solidLinePos)
         datafile.solidLines(i) = line(ax,[solidLinePos(i),solidLinePos(i)],...
                 [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
-                (next_active_offset-1)*datafile.channelSpacing],'Color',[0 0 0],'hittest','off');
+                datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[0 0 0],'hittest','off');
     end
+    
     set(ax,'YTickLabel',[]);
-    yticks((1:(next_active_offset-1))*datafile.channelSpacing);
+    yticks((1:datafile.numOfActiveChannels)*datafile.channelSpacing);
 %     ax = gca;
     datafile.bufferStart = beginBuffer;
     datafile.bufferEnd = endBuffer;
     %drawnow;
+    
+    % update spikeLines
+    datafile = updateSpikes(datafile);
     fprintf('Finished reading. ');toc
    
    
