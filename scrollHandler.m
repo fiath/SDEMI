@@ -1,5 +1,8 @@
 function scrollHandler(hObject, eventdata, handles)
     handles = guidata(hObject);
+    if ~handles.datLoaded
+        return;
+    end
     C = get (handles.axes1, 'CurrentPoint');
     XLim = get(handles.axes1, 'XLim');
     YLim = get(handles.axes1, 'YLim');

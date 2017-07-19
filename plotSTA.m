@@ -57,10 +57,10 @@ function plotSTA(fig,unit)
     time = traceHandles.datafile.length/traceHandles.datafile.samplingRate;
     set(handles.spikenumber,'String',['Number of spikes: ',num2str(numOfSpikes)]);
     set(handles.spikefrequency,'String',['Spiking frequency: ',num2str(numOfSpikes/time),'Hz']);
-    [~,min_index] = ind2sub(size(data),min_index);
-    [~,max_index] = ind2sub(size(data),max_index);
-    set(handles.spikemax,'String',['Maximum: ',num2str(max_v),' at ',num2str(max_index)]);
-    set(handles.spikemin,'String',['Minimum: ',num2str(min_v),' at ',num2str(min_index)]);
+    [min_channel,min_index] = ind2sub(size(data),min_index);
+    [max_channel,max_index] = ind2sub(size(data),max_index);
+    set(handles.spikemax,'String',['Maximum: ',num2str(max_v),' at ',num2str(max_index),'@',num2str(max_channel)]);
+    set(handles.spikemin,'String',['Minimum: ',num2str(min_v),' at ',num2str(min_index),'@',num2str(min_channel)]);
     
     %update traceview's spikeLines
     rawHandles = guidata(handles.rawfig);

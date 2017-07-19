@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 28-Jun-2017 18:20:54
+% Last Modified by GUIDE v2.5 19-Jul-2017 10:47:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -165,6 +165,10 @@ function keyupHandler(hObject, eventdata, handles)
 
 function mousemoveHandler(hObject, eventdata, handles)
     %fprintf('MouseMoveEvent\n');
+    handles = guidata(hObject);
+    if ~handles.datLoaded
+        return;
+    end
     updateTooltip(hObject);
 
 function closeHandler(hObject,eventdata)
@@ -404,3 +408,19 @@ function filterchangeview_Callback(hObject, eventdata, handles)
 % hObject    handle to filterchangeview (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Transform_Callback(hObject, eventdata, handles)
+% hObject    handle to Transform (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function stagen_Callback(hObject, eventdata, handles)
+% hObject    handle to stagen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
+    transformData(handles.figure1);
