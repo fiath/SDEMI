@@ -58,6 +58,7 @@ function loadSTA(fig)
     % <String,[Int]> maps the name of the file to the array of spike
     % positions in datapoints
     handles.eventFiles = containers.Map;
+    handles.heatmapRange = [];
     %handles.autoCorrBinSize = 20;
     %handles.autoCorrRange = 30;
     
@@ -82,9 +83,16 @@ function loadSTA(fig)
     handles.spikemax = findobj(stafig,'Tag','spikemax');
     handles.cursorChannelString = findobj(stafig,'Tag','cursorchannel');
     handles.cursorChannelLine = gobjects;
+    handles.heatmapRangeMin = findobj(stafig,'Tag','heatmapmin');
+    handles.heatmapRangeMax = findobj(stafig,'Tag','heatmapmax');
+    handles.heatmapRangeManual = findobj(stafig,'Tag','heatmaprangemanual');
+    handles.heatmapRangePanel = findobj(stafig,'Tag','heatmaprangepanel');
     
     set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
+    set(handles.heatmapRangeManual,'Callback',@heatmapRangeHandler);
+    set(handles.heatmapRangeMin,'Callback',@heatmapMinHandler);
+    set(handles.heatmapRangeMax,'Callback',@heatmapMaxHandler);
     hold(handles.axes1,'all');
     handles.heatCtxMenu = uicontextmenu(handles.stafig);
     topmenu = uimenu('Parent',handles.heatCtxMenu,'Label','Save image','Callback',@saveImage);

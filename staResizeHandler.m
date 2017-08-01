@@ -34,9 +34,15 @@ function staResizeHandler(hObject,~,~)
     infoPos = get(handles.infopanel,'Position');
     set(handles.infopanel,'Position',[infoL,infoT-infoPos(4),infoPos(3),infoPos(4)]);
     
+    % reposition colorbar manual range
+    rangeL = infoL;
+    rangeT = infoT - infoPos(4) - 10;
+    rangePos = get(handles.heatmapRangePanel,'Position');
+    set(handles.heatmapRangePanel,'Position',[rangeL,rangeT-rangePos(4),rangePos(3:4)])
+    
     % reposition autocorr
     corrL = infoL;
-    corrT = infoT - infoPos(4) - 30;
+    corrT = rangeT - rangePos(4) - 30;
     %corrH = hPos(4)*figPos(4) - infoPos(4) - 30;
     corrPos = get(handles.autocorr,'Position');
     corrPos(3) = figPos(3) - corrL - 0.05*figPos(3);

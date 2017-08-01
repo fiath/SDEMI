@@ -25,14 +25,13 @@ function success = plotHeatmap( fig, position )
             end
         end
     end
-    max_abs_v = max(max(abs(handles.data(:,:,handles.unit))));
+    %max_abs_v = max(max(abs(handles.data(:,:,handles.unit))));
     h = imagesc(handles.heatmap,hm_data);
     handles.heatMapImage = h;
     h.UIContextMenu = handles.heatCtxMenu;
     if c*r ~= size(handles.data)
         set(h,'alphadata',~isnan(hm_data));
     end
-    caxis(handles.heatmap,[-max_abs_v,max_abs_v]);
     % heatmapOriginalPosition
     pos = handles.heatmapOriginalPosition;
     C = colorbar(handles.heatmap,'location','manual','Position',[pos(1)+pos(3)+.01 pos(2) .01 pos(4)]);
@@ -41,6 +40,7 @@ function success = plotHeatmap( fig, position )
     guidata(fig,handles);
     updateLinePosition(fig);
     updateDatapointTextBoxes(fig);
+    updateHeatMapRange(fig);
 end
 
 function updateLinePosition(fig)

@@ -39,6 +39,10 @@ function plotSTA(fig,unit)
     handles.crossCorrUnit = unit;
     set(handles.dropDown,'Value',unit);
     set(handles.corrSelector,'Value',unit);
+    % if manual is not active
+    if get(handles.heatmapRangeManual,'Value') == get(handles.heatmapRangeManual,'Min')
+        handles.heatmapRange = [];
+    end
     guidata(fig,handles);
     
     [~,min_pos] = min(min(data));
