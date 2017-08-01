@@ -12,6 +12,10 @@ function staResizeHandler(hObject,~,~)
     center = (axPos(1) + axPos(3)/2)*figPos(3);
     set(handles.dropDown,'Position',[center - width/2,top + 5,width,height]);
     
+    % reposition cursorChannelString
+    cursorChannelPos = get(handles.cursorChannelString,'Position');
+    set(handles.cursorChannelString,'Position',[center+width/2+5,top+15,cursorChannelPos(3:4)]);
+    
     
     % reposition datapoint windows (currDP, totalDP)
     hPos =  get(handles.heatmap,'Position');

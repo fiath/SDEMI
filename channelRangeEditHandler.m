@@ -12,7 +12,9 @@ function [ output_args ] = channelRangeEditHandler( hObject, eventdata )
         set(hObject,'String',handles.datafile.channelRangeString);
     end
     if success == 1
-        guidata(hObject,handles);
+        %position window to encompass all channels
+        handles.datafile.ylim = [-Inf,Inf];
+        guidata(hObject,handles);        
         % update plot
         refreshDataView(hObject);
          set(hObject, 'Enable', 'off');

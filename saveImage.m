@@ -1,7 +1,7 @@
 function saveImage(hObject,~,~)
 %SAVEASBMP Summary of this function goes here
 %   Detailed explanation goes here
-    [file,path] = uiputfile({'*.bmp','*.png'},'Save as');
+    [file,path] = uiputfile({'*.bmp';'*.png'},'Save as');
     if ~file
         return;
     end

@@ -9,7 +9,7 @@ function updateIdPositions(handles)
     axPos(4) = axPos(4)*figPos(4);
     labels = datafile.channelIds;
     next_active_offset = 1;
-    for i=1:size(labels,1)
+    for i=size(labels,1):-1:1
         if ~datafile.activeChannels(i)
             set(labels(i),'Visible','off');
             continue;

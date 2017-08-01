@@ -80,6 +80,8 @@ function loadSTA(fig)
     handles.spikefrequency = findobj(stafig,'Tag','spikefrequency');
     handles.spikemin = findobj(stafig,'Tag','spikemin');
     handles.spikemax = findobj(stafig,'Tag','spikemax');
+    handles.cursorChannelString = findobj(stafig,'Tag','cursorchannel');
+    handles.cursorChannelLine = gobjects;
     
     set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
@@ -189,4 +191,37 @@ function stafigButtonDownHandler(hObject,eventdata,~)
 end
 
 function stafigMouseMoveHandler(hObject,eventdata,~)
+    handles = guidata(hObject);
+    C = get (handles.axes1, 'CurrentPoint');
+    XLim = get(handles.axes1, 'XLim');
+    YLim = get(handles.axes1, 'YLim');
+    cursorChannelString = '';
+    if isgraphics(handles.cursorChannelLine)
+        delete(handles.cursorChannelLine);
+    end
+    if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
+        YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
+        % moving inside the sta plot
+        c = handles.column;
+        r = ceil(size(handles.data,1)/c); % necessary number of rows
+        
+        x = ceil((C(1,1)-XLim(1))/(XLim(2)-XLim(1))*c);
+        x = max(1,x);
+        y = ceil((C(1,2)-YLim(1))/(YLim(2)-YLim(1))*r);
+        y = max(1,y);
+        y = r+1-y; % y is inverted
+        
+        channelIndex = c*(y-1)+x;
+        if channelIndex <= size(handles.data,1)
+            cursorChannelString = ['@',num2str(channelIndex)];
+            rectXmin = XLim(1) + (x-1)*(XLim(2)-XLim(1))/c;
+            rectXmax = rectXmin + (XLim(2)-XLim(1))/c;
+            rectYmin = YLim(1) + (r+1-y-1)*(YLim(2)-YLim(1))/r;
+            rectYmax = rectYmin + (YLim(2)-YLim(1))/r;
+            handles.cursorChannelLine = plot(handles.axes1,[rectXmin,rectXmax,rectXmax,rectXmin,rectXmin],...
+                [rectYmin,rectYmin,rectYmax,rectYmax,rectYmin],'b');
+        end
+    end
+    set(handles.cursorChannelString,'String',cursorChannelString);
+    guidata(hObject,handles);
 end

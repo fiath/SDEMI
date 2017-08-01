@@ -12,6 +12,14 @@ function ylim = CheckYLim(ylim,datafile)
     end
     ymin = datafile.maxYLimDiff(1) + datafile.channelSpacing;
     ymax = datafile.maxYLimDiff(2) + (numOfActiveChannels)*datafile.channelSpacing;
+    % crop infinities
+    if ylim(1) == -Inf
+        ylim(1) = ymin;
+    end
+    if ylim(2) == Inf
+        ylim(2) = ymax;
+    end
+    % shift by the amount it is outside
     if ylim(1) < ymin
         ylim = ylim + (ymin - ylim(1));
     end

@@ -122,7 +122,7 @@ function window = checkDataWindow(datafile,window)
     end
     
     next_active_offset = 1;
-    for i=1:datafile.numberOfChannels
+    for i=datafile.numberOfChannels:-1:1
         if datafile.activeChannels(i)
             datafile.buffer(i,:) = datafile.buffer(i,:) + next_active_offset*datafile.channelSpacing;
             next_active_offset = next_active_offset + 1;

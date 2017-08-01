@@ -13,7 +13,8 @@ function plotSTA(fig,unit)
     [min_v,min_index] = min(data(:));
     [max_v,max_index] = max(data(:));
     rangeX = size(data,2)-1;
-    rangeY = max([abs(max_v),abs(min_v)])*2*1.1;
+    rangeY = max_v-min_v;%max([abs(max_v),abs(min_v)])*2*1.1;
+    plotZero = abs(min_v); % rangeY/2
     c = handles.column;
     r = ceil(size(data,1)/c); % necessary number of rows
     for i=1:r
@@ -21,7 +22,7 @@ function plotSTA(fig,unit)
             if (i-1)*c + j <= size(data,1)
                 offsetX = (j-1)*rangeX;
                 offsetY = (r-i)*rangeY;
-                plot(ax,offsetX:1:(offsetX+rangeX),data((i-1)*c+j,:) + offsetY + rangeY/2,'Color','red','LineWidth',1);
+                plot(ax,offsetX:1:(offsetX+rangeX),data((i-1)*c+j,:) + offsetY + plotZero,'Color','red','LineWidth',1);
                 hold(ax,'on');
             end
         end
