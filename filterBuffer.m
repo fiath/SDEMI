@@ -3,7 +3,7 @@ function buffer = filterBuffer(datafile,buffer)
 %   Detailed explanation goes here
     buffer = filter(datafile.filter.B,datafile.filter.A,...
                                 buffer,[],2);
-    buffer = fliplr(datafile.buffer);
+    buffer = fliplr(buffer);
     buffer = filter(datafile.filter.B,datafile.filter.A,...
                                 buffer,[],2);
     buffer = fliplr(buffer);
