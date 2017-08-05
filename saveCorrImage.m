@@ -1,5 +1,5 @@
-function saveImage(hObject,~,~)
-%SAVEASBMP Summary of this function goes here
+function saveCorrImage(hObject,~,~)
+%SAVECORRIMAGE Summary of this function goes here
 %   Detailed explanation goes here
     [file,path] = uiputfile({'*.bmp';'*.png'},'Save as');
     if ~file
@@ -10,7 +10,7 @@ function saveImage(hObject,~,~)
     %im = frame2im(getframe(handles.heatmap));
     %imwrite(im,[path, file]);
     
-    f = plotHeatmapAsFig(hObject);
+    f = plotCorrAsFig(hObject);
     saveas(f,[path,file]);
     ext_index = find(file=='.',1,'last');
     if isempty(ext_index)
@@ -19,5 +19,6 @@ function saveImage(hObject,~,~)
     file = [file(1:ext_index-1),'.emf'];
     saveas(f,[path,file]);
     close(f);
+
 end
 

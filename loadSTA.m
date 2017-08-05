@@ -97,6 +97,9 @@ function loadSTA(fig)
     hold(handles.axes1,'all');
     handles.heatCtxMenu = uicontextmenu(handles.stafig);
     topmenu = uimenu('Parent',handles.heatCtxMenu,'Label','Save image','Callback',@saveImage);
+    handles.corrCtxMenu = uicontextmenu(handles.stafig);
+    topmenu = uimenu('Parent',handles.corrCtxMenu,'Label','Save image','Callback',@saveCorrImage);
+    handles.autocorr.UIContextMenu = handles.corrCtxMenu;
     %set(handles.heatmap,'ButtonDownFcn',@buttonDownHandler);
     handles.position = -1; % in datapoints
     colormap(handles.heatmap,'jet');

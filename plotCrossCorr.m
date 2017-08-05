@@ -15,7 +15,8 @@ function plotCrossCorr(fig,numOfBins,binSize,unit)
     else
         acorr = calcCrossCorr(fig,AFilePath,BFilePath,binSize,numOfBins);
     end
-    bar(handles.autocorr,(-numOfBins:numOfBins)*binSize*1000/handles.samplingRate,acorr,'hist');
+    b = bar(handles.autocorr,(-numOfBins:numOfBins)*binSize*1000/handles.samplingRate,acorr,'hist');
+    %b.UIContextMenu = handles.corrCtxMenu;
     % dont put space because [-1 - 1] is NOT [-2] but [-1, -1]
     xlim(handles.autocorr,[-numOfBins-1,numOfBins+1]*binSize*1000/handles.samplingRate);
     h = findobj(handles.autocorr,'Type','line');
