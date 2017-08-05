@@ -12,11 +12,8 @@ function scrollHandler(hObject, eventdata, handles)
             ySize = YLim(2) - YLim(1);
             center = (YLim(1)+YLim(2))/2;
             if ~handles.modifiers.ctrl
-                if eventdata.VerticalScrollCount < 0 
-                    YLim = YLim + ySize/20;
-                else
-                    YLim = YLim - ySize/20;
-                end
+                scrollVert(hObject,eventdata.VerticalScrollCount);
+                return;
             else 
                 if eventdata.VerticalScrollCount > 0 
                     ySize = ySize + max([ySize*0.05,10]);
@@ -35,12 +32,8 @@ function scrollHandler(hObject, eventdata, handles)
         else
             window = handles.datafile.dataWindow;
             if ~handles.modifiers.ctrl
-                if eventdata.VerticalScrollCount > 0 
-                    window = window + floor(handles.datafile.windowSize/20);
-                else
-                    window = window - floor(handles.datafile.windowSize/20);
-                end
-                handles.datafile = updateWindow(handles,window);
+                scrollHoriz(hObject,eventdata.VerticalScrollCount);
+                return;
             else
                 center = floor((window(1) + window(2))/2);
                 if eventdata.VerticalScrollCount > 0 

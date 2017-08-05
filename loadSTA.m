@@ -41,6 +41,7 @@ function loadSTA(fig)
     
     % set up gui
     stafig = matlab.hg.internal.openfigLegacy('sta', 'reuse', 'visible');
+    set(stafig,'PaperPositionMode','auto');
     set(stafig,'CloseRequestFcn',@closeHandler);
     set(stafig,'ResizeFcn',@staResizeHandler);
     set(stafig,'WindowScrollWheelFcn',@scrollHandler);

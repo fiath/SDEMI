@@ -141,6 +141,19 @@ function keydownHandler(hObject, eventdata, handles)
         handles.modifiers.alt = 1;
     end
     guidata(hObject, handles);
+    if strcmp(eventdata.Key,'rightarrow')
+        fprintf('Rightarrow down\n');
+        scrollHoriz(hObject,1);
+    elseif strcmp(eventdata.Key,'leftarrow')
+        fprintf('Leftarrow down\n');
+        scrollHoriz(hObject,-1);
+    elseif strcmp(eventdata.Key,'uparrow')
+        fprintf('Uparrow down\n');
+        scrollVert(hObject,-1);
+    elseif strcmp(eventdata.Key,'downarrow')
+        fprintf('Downarrow down\n');
+        scrollVert(hObject,1);
+    end
     
     
 function keyupHandler(hObject, eventdata, handles)
