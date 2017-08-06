@@ -11,11 +11,17 @@ function datafile = updateSpikes(datafile)
     datafile.spikeLines = gobjects;
     if isgraphics(stafig)
         % draw spikeLines
-        spikes = getSpikesInScope(stafig,datafile.bufferStart,datafile.bufferEnd);
+        spikes = getSpikesInScope(stafig,datafile,datafile.bufferStart,datafile.bufferEnd);
         fprintf('Drawing %d spikes\n',length(spikes));
         datafile.spikeLines = gobjects(1,length(spikes));
-        for i=1:length(spikes)
-            datafile.spikeLines(i) = line(ax,[spikes(i)/datafile.samplingRate,spikes(i)/datafile.samplingRate],...
+        for i=1:min([1,length(spikes)]);
+            datafile.spikeLines(i) = line(ax,[spikes(i),spikes(i)],...
+                    [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
+                    datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[1 0 0],'hittest','off');
+        end
+        for i=2:length(spikes)
+            % draw only those spikes which are sufficiently far away (visually distinguishable)
+            datafile.spikeLines(i) = line(ax,[spikes(i),spikes(i)],...
                     [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
                     datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[1 0 0],'hittest','off');
         end
