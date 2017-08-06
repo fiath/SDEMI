@@ -100,6 +100,9 @@ function loadSTA(fig)
     handles.corrCtxMenu = uicontextmenu(handles.stafig);
     topmenu = uimenu('Parent',handles.corrCtxMenu,'Label','Save image','Callback',@saveCorrImage);
     handles.autocorr.UIContextMenu = handles.corrCtxMenu;
+    handles.wfCtxMenu = uicontextmenu(handles.stafig);
+    topmenu = uimenu('Parent',handles.wfCtxMenu,'Label','Save image','Callback',@saveWfImage);
+    handles.axes1.UIContextMenu = handles.wfCtxMenu;
     %set(handles.heatmap,'ButtonDownFcn',@buttonDownHandler);
     handles.position = -1; % in datapoints
     colormap(handles.heatmap,'jet');
@@ -195,10 +198,13 @@ function stafigButtonDownHandler(hObject,eventdata,~)
     YLim = get(handles.axes1, 'YLim');
     if XLim(1)<=C(1,1) && XLim(2)>=C(1,1) && ...
         YLim(1)<=C(1,2) && YLim(2)>=C(1,2)
-        % clicked inside axes1
-        pos = rem(C(1,1),size(handles.data,2)-1);
-        pos = floor(pos);
-        plotHeatmap(handles.stafig,pos);
+        if strcmp(get(handles.stafig,'SelectionType'),'normal')
+            % clicked inside axes1
+            pos = rem(C(1,1),size(handles.data,2)-1);
+            pos = floor(pos);
+            plotHeatmap(handles.stafig,pos);
+        elseif strcmp(get(handles.stafig,'SelectionType'),'alt')
+        end
     end
 end
 
