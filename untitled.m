@@ -56,6 +56,7 @@ hideAllChildren(handles.figure1);
 
 
 handles.output = hObject;
+handles.figure1.PaperPositionMode = 'auto';
 
 set(handles.figure1,'WindowButtonMotionFcn',@mousemoveHandler);
 set(handles.figure1,'WindowScrollWheelFcn',@scrollHandler);
@@ -67,6 +68,7 @@ set(handles.edit1,'Callback',@channelRangeEditHandler);
 set(handles.positionEditText,'Callback',@positionEditHandler);
 set(handles.filtertoggleview,'Callback',@filterToggleHandler);
 set(handles.filterchangeview,'Callback',@changeFilterHandler);
+set(handles.saveasimage,'Callback',@saveTraceImage);
 handles.stafig = gobjects;
 
 handles.datafile = struct( 'fig',handles.figure1,... 
@@ -118,6 +120,9 @@ handles.datafile = struct( 'fig',handles.figure1,...
 
 set(handles.axes1,'YLimMode','manual');
 set(handles.axes1,'XLimMode','manual');
+%handles.traceCtxMenu = uicontextmenu(handles.figure1);
+%topmenu = uimenu('Parent',handles.traceCtxMenu,'Label','Save image','Callback',@saveTraceImage);
+%handles.axes1.UIContextMenu = handles.traceCtxMenu;
 handles.modifiers = struct('shift',0,'ctrl',0,'alt',0,'space',0);
 handles.datLoaded = 0;
 [B,A] = butter(handles.datafile.filter.order,...
