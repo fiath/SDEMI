@@ -13,8 +13,8 @@ function datafile = updateWindow(handles,newWindow,force)
         end
         ax = handles.axes1;
         datafile = handles.datafile;
-        newWindow = checkDataWindow(datafile,newWindow);
-        datafile = updateBuffer(ax,datafile,newWindow,force);
+        [datafile,newWindow,switched] = checkDataWindow(datafile,newWindow);
+        datafile = updateBuffer(ax,datafile,newWindow,force || switched);
         startWindow = newWindow(1);      
         endWindow = newWindow(2);
         fprintf('Start: %d, End: %d\n',startWindow,endWindow);
@@ -37,24 +37,8 @@ function datafile = updateWindow(handles,newWindow,force)
         %center = round((datafile.dataWindow(1) + datafile.dataWindow(2))/2/datafile.samplingRate);
         %delete(datafile.pivotLine);
         %datafile.pivotLine = line(ax,[center,center],get(ax,'YLim'));
-        
-
-function window = checkDataWindow(datafile,window)
-    size = min([datafile.length,datafile.maxWindowSize,window(2) - window(1)+1]);
-    if size < 0
-        error('newDataWindow.size cannot be negative');
-    end
-    center = floor((window(1) + window(2))/2);
-    window(1) = center - ceil(size/2)+1;
-    window(2) = window(1) + size-1;
-    if window(1) < 0
-        window(1) = 0;
-        window(2) = size-1;
-    end
-    if window(2) >= datafile.length
-        window(2) = datafile.length-1;
-        window(1) = window(2) - size+1;
-    end
+    
+    
     
  function datafile = updateBuffer(ax,datafile,newWindow,force)
     center = floor((newWindow(1) + newWindow(2))/2 - datafile.bufferStart);
@@ -95,11 +79,17 @@ function window = checkDataWindow(datafile,window)
     end
     fprintf('Reading from %d to %d, a total of %d\n',beginBuffer+1,endBuffer,datafile.bufferSize);
     % if filter is active carry out high-pass filtering
+    % no filtering on downsampled file!!!
+    if datafile.filter.on && datafile.usingDownsampled
+        error('Cannot use filtering while using downsampled  data!');
+    end
     if datafile.filter.on
         datafile.buffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
         
         
         datafile.buffer = filterBuffer(datafile,datafile.buffer);
+    elseif datafile.usingDownsampled
+        datafile.buffer = datafile.downsampled.data(:,beginBuffer+1:endBuffer);
     else
         datafile.buffer = datafile.file.Data.x(:,beginBuffer+1:endBuffer);
     end
@@ -120,6 +110,9 @@ function window = checkDataWindow(datafile,window)
         % it hasnt been scaled yet
         datafile.buffer = 0.195*double(datafile.buffer);
     end
+    
+    % apply amplited
+    datafile.buffer = datafile.buffer*datafile.amplitude;
     
     next_active_offset = 1;
     for i=datafile.numberOfChannels:-1:1
@@ -151,11 +144,13 @@ function window = checkDataWindow(datafile,window)
         delete(datafile.dashedLines(i));
     end
     % add new lines
-    datafile.dashedLines = gobjects(1,length(dashedLinePos));
-    for i=1:length(dashedLinePos)
-        datafile.dashedLines(i) = line(ax,[dashedLinePos(i),dashedLinePos(i)],...
-                [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
-                datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[0.2 0.2 0.2],'LineStyle','--','hittest','off');
+    if datafile.bufferSize/2/datafile.samplingRate < 10
+        datafile.dashedLines = gobjects(1,length(dashedLinePos));
+        for i=1:length(dashedLinePos)
+            datafile.dashedLines(i) = line(ax,[dashedLinePos(i),dashedLinePos(i)],...
+                    [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
+                    datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[0.2 0.2 0.2],'LineStyle','--','hittest','off');
+        end
     end
     datafile.solidLines = gobjects(1,length(solidLinePos));
     for i=1:length(solidLinePos)

@@ -70,9 +70,13 @@ set(handles.filterchangeview,'Callback',@changeFilterHandler);
 handles.stafig = gobjects;
 
 handles.datafile = struct( 'fig',handles.figure1,... 
+                    'ax',handles.axes1,...
+                    'downsampled',[],...
+                    'usingDownsampled',0,...
                     'numberOfChannels',128,...
                     'resolution',2,...
                     'samplingRate',20000,...
+                    'amplitude',1,...
                     'file',-1,...
                     'length',-1,...
                     'channelLines',[],...
@@ -114,7 +118,7 @@ handles.datafile = struct( 'fig',handles.figure1,...
 
 set(handles.axes1,'YLimMode','manual');
 set(handles.axes1,'XLimMode','manual');
-handles.modifiers = struct('shift',0,'ctrl',0,'alt',0);
+handles.modifiers = struct('shift',0,'ctrl',0,'alt',0,'space',0);
 handles.datLoaded = 0;
 [B,A] = butter(handles.datafile.filter.order,...
                 handles.datafile.filter.frequency,'high');
@@ -139,6 +143,10 @@ function keydownHandler(hObject, eventdata, handles)
     if any(strcmp(eventdata.Modifier,'alt')) && ~handles.modifiers.alt
         fprintf('Alt down\n');
         handles.modifiers.alt = 1;
+    end
+    if strcmp(eventdata.Key,'space') && ~handles.modifiers.space
+        fprintf('Space down\n');
+        handles.modifiers.space = 1;
     end
     guidata(hObject, handles);
     if strcmp(eventdata.Key,'rightarrow')
@@ -185,6 +193,11 @@ function keyupHandler(hObject, eventdata, handles)
     if ~any(strcmp(eventdata.Modifier,'alt')) && handles.modifiers.alt
         fprintf('Alt up\n');
         handles.modifiers.alt = 0;
+    end
+    currKey = get(hObject,'CurrentKey');
+    if strcmp(eventdata.Key,'space') && ~strcmp(currKey,'space') && handles.modifiers.space
+        fprintf('Space up\n');
+        handles.modifiers.space = 0;
     end
     guidata(hObject, handles);
     if strcmp(eventdata.Key,'f5')

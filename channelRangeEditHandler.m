@@ -14,6 +14,7 @@ function [ output_args ] = channelRangeEditHandler( hObject, eventdata )
     if success == 1
         %position window to encompass all channels
         handles.datafile.ylim = [-Inf,Inf];
+        handles.datafile.amplitude = 1;
         guidata(hObject,handles);        
         % update plot
         refreshDataView(hObject);

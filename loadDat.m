@@ -38,6 +38,21 @@ function loadDat(fig)
         set(datafile.channelIds(i),'ButtonDownFcn',{@onChannelIdHandler,i},'Enable','inactive');
         set(datafile.channelIds(i),'HorizontalAlignment','right');
     end
+    % load downsampled data if possible
+    try
+        extIndex = find(filename=='.',1,'last');
+        if isempty(extIndex)
+            downSampledFileName = [filename,'_downsampled.mat'];
+        else
+            downSampledFileName = [filename(1:extIndex-1),'_downsampled.mat'];
+        end
+        datafile.downsampled = load([datafile.filedir downSampledFileName]);
+        datafile.maxWindowSize = 200000;
+    catch
+        warning('No downsampled file in %s with name %s',dir2,matOneList(i).name);
+        datafile.downsampled = [];
+        datafile.maxWindowSize = 100000;
+    end
     
     handles.datafile = datafile;
     

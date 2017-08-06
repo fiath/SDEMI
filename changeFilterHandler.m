@@ -2,6 +2,9 @@ function changeFilterHandler(hObject,~,~)
 %CHANGEFILTERHANDLER Summary of this function goes here
 %   Detailed explanation goes here
     handles = guidata(hObject);
+    if handles.datafile.usingDownsampled
+        error('Cannot filter while using downsampled');
+    end
     freq = floor(handles.datafile.filter.frequency*handles.datafile.samplingRate/2);
     answer = inputdlg({'Order of filter:','Cut-off frequency:'},...
                             'Filter',1,{num2str(handles.datafile.filter.order),...
