@@ -79,7 +79,8 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
         currEv = indexOfMin(eventFileList);
         processedSpikes = processedSpikes + 1;
         if processedSpikes*1000 >= (currMill + 1)*numOfAllSpikes
-            currMill = currMill+1;
+            %currMill = currMill+1;
+            currMill = floor(processedSpikes*1000/numOfAllSpikes);
             updateProgress(currMill,sprintf('Processing spikes: %0.1f %%',currMill/10));
         end
     end
