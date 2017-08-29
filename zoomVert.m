@@ -20,6 +20,7 @@ function zoomVert(hObject,dir)
     delete(handles.datafile.pivotLine);
     handles.datafile.pivotLine = line(handles.axes1,[center,center],get(handles.axes1,'YLim'));
     
+    repositionSpikeLines(handles.datafile);
     updateIdPositions(handles);
     guidata(hObject, handles);
     updateTooltip(hObject);

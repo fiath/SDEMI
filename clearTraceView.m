@@ -8,6 +8,8 @@ function clearTraceView( fig )
         % no .dat is loaded to be removed
         return;
     end
+    
+    error('TODO: Does not correctly initialize handles.datafile');
 
     % remove channelIds
     for i=1:size(datafile.channelIds,1)

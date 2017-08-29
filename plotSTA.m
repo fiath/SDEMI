@@ -69,7 +69,10 @@ function plotSTA(fig,unit)
     
     %update traceview's spikeLines
     rawHandles = guidata(handles.rawfig);
+    rawHandles.datafile.allSpikeCount = numOfSpikes;
+    rawHandles.datafile.currentSpike = 1;
     rawHandles.datafile = updateSpikes(rawHandles.datafile);
     guidata(handles.rawfig,rawHandles);
+    updateSpikeSelector(rawHandles);
 end
 

@@ -26,6 +26,10 @@ function resizeHandler(hObject,~,~)
     height = pos(4);
     set(handles.edit1,'Position',[left,top + 10,width,height]);
     
+    % position spike selector boxes
+    pos = get(handles.spikeselector,'Position');
+    set(handles.spikeselector,'Position',[left + width + 10, top + 10, pos(3:4)]);
+    
     % position time selector text box
     pos = get(handles.positionEditText,'Position');
     width = pos(3);

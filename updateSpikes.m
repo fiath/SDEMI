@@ -8,23 +8,31 @@ function datafile = updateSpikes(datafile)
     for i=1:length(datafile.spikeLines)
         delete(datafile.spikeLines(i));
     end
+    delete(datafile.currentSpikeLine);
+    datafile.currentSpikeLine = gobjects;
     datafile.spikeLines = gobjects;
     if isgraphics(stafig)
         % draw spikeLines
         spikes = getSpikesInScope(stafig,datafile,datafile.bufferStart,datafile.bufferEnd);
+        currentSpike = getSpikeAt(stafig,datafile,datafile.currentSpike);
         fprintf('Drawing %d spikes\n',length(spikes));
         datafile.spikeLines = gobjects(1,length(spikes));
-        for i=1:min([1,length(spikes)]);
+        for i=1:min([1,length(spikes)])
             datafile.spikeLines(i) = line(ax,[spikes(i),spikes(i)],...
-                    [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
-                    datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[1 0 0],'hittest','off');
+                    [datafile.ylim(1),datafile.ylim(1) + ...
+                    (datafile.ylim(2)-datafile.ylim(1))*0.05],'Color',[0 0 1],'hittest','off');
         end
         for i=2:length(spikes)
             % draw only those spikes which are sufficiently far away (visually distinguishable)
+            % currently does not do that
             datafile.spikeLines(i) = line(ax,[spikes(i),spikes(i)],...
-                    [datafile.maxYLimDiff(1)+datafile.channelSpacing,datafile.maxYLimDiff(2) + ...
-                    datafile.numOfActiveChannels*datafile.channelSpacing],'Color',[1 0 0],'hittest','off');
+                    [datafile.ylim(1),datafile.ylim(1) + ...
+                    (datafile.ylim(2)-datafile.ylim(1))*0.05],'Color',[0 0 1],'hittest','off');
         end
+        % draw current spike
+        datafile.currentSpikeLine = line(ax,[currentSpike,currentSpike],...
+                    [datafile.ylim(1),datafile.ylim(1) + ...
+                    (datafile.ylim(2)-datafile.ylim(1))*0.05],'Color',[1 0 0],'hittest','off');
     end
 
 end

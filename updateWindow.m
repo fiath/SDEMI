@@ -23,6 +23,7 @@ function datafile = updateWindow(handles,newWindow,force)
         datafile.ylim = CheckYLim(datafile.ylim,datafile);
         set(ax,'YLim',datafile.ylim);
         set(ax,'XLim',[newWindow(1)/datafile.samplingRate,newWindow(2)/datafile.samplingRate]);
+        repositionSpikeLines(datafile);
         %drawnow
         datafile.dataWindow = newWindow;
         datafile.centerString = timeToString(round((datafile.dataWindow(1) + ...

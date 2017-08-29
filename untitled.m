@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 19-Jul-2017 10:47:34
+% Last Modified by GUIDE v2.5 29-Aug-2017 11:46:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,6 +68,9 @@ set(handles.edit1,'Callback',@channelRangeEditHandler);
 set(handles.positionEditText,'Callback',@positionEditHandler);
 set(handles.filtertoggleview,'Callback',@filterToggleHandler);
 set(handles.filterchangeview,'Callback',@changeFilterHandler);
+set(handles.leftspike,'Callback',@previousSpike);
+set(handles.rightspike,'Callback',@nextSpike);
+set(handles.currentspiketext,'Callback',@currentSpikeChangeHandler);
 set(handles.saveasimage,'Callback',@saveTraceImage);
 handles.stafig = gobjects;
 
@@ -116,7 +119,10 @@ handles.datafile = struct( 'fig',handles.figure1,...
                     'timeFormat','%dh%dm%d.%03ds',...
                     'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt,'active',0),...
                     'loadingSTA',0,...
-                    'spikeLines',gobjects);
+                    'spikeLines',gobjects,...
+                    'currentSpikeLine',gobjects,...
+                    'currentSpike',-1,...
+                    'allSpikeCount',-1);
 
 set(handles.axes1,'YLimMode','manual');
 set(handles.axes1,'XLimMode','manual');
@@ -133,6 +139,7 @@ handles.datafile.filter.B = B;
 
 % Update handles structure
 guidata(hObject, handles);
+setSpikeSelectorState(handles,'off');
 %loadSTA(hObject,'/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/mat/');
 
 function keydownHandler(hObject, eventdata, handles)
@@ -172,6 +179,8 @@ function keydownHandler(hObject, eventdata, handles)
         fprintf('Uparrow down\n');
         if handles.modifiers.ctrl
             zoomVert(hObject,-1);
+        elseif handles.modifiers.alt
+            changeAmplitude(hObject,-1);
         else
             scrollVert(hObject,-1);
         end
@@ -179,6 +188,8 @@ function keydownHandler(hObject, eventdata, handles)
         fprintf('Downarrow down\n');
         if handles.modifiers.ctrl
             zoomVert(hObject,1);
+        elseif handles.modifiers.alt
+            changeAmplitude(hObject,1);
         else
             scrollVert(hObject,1);
         end
@@ -471,3 +482,40 @@ function stagen_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     handles = guidata(hObject);
     transformData(handles.figure1);
+
+
+% --- Executes on button press in leftspike.
+function leftspike_Callback(hObject, eventdata, handles)
+% hObject    handle to leftspike (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in rightspike.
+function rightspike_Callback(hObject, eventdata, handles)
+% hObject    handle to rightspike (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function currentspiketext_Callback(hObject, eventdata, handles)
+% hObject    handle to currentspiketext (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of currentspiketext as text
+%        str2double(get(hObject,'String')) returns contents of currentspiketext as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function currentspiketext_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to currentspiketext (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
