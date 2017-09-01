@@ -1,0 +1,53 @@
+function openHeatmapView(rawfig)
+%OPENHEATMAPVIEW Summary of this function goes here
+%   Detailed explanation goes here
+    rawHandles = guidata(rawfig);
+    if isgraphics(rawHandles.hmfig)
+        close(rawHandles.hmfig);
+    end
+
+    hmFig = matlab.hg.internal.openfigLegacy('heatmapview', 'reuse', 'visible');
+    rawHandles.hmfig = hmFig;
+    set(rawHandles.traceview,'Enable','off');
+    
+    handles = struct('hmfig',hmFig,'rawfig',rawfig);
+    views = {'lfp','csd','mua'};
+    for i=1:length(views)
+        handles.(views{i}) = struct();
+        handles.(views{i}).axes = findobj(hmFig,'Tag',[views{i},'axes']);
+        handles.(views{i}).image = imagesc(handles.(views{i}).axes,[]);
+        C = colorbar(handles.(views{i}).axes);
+        C.UIContextMenu = '';
+        handles.(views{i}).rangeButton = findobj(hmFig,'Tag',[views{i},'rangebutton']);
+        handles.(views{i}).minText = findobj(hmFig,'Tag',[views{i},'min']);
+        handles.(views{i}).maxText = findobj(hmFig,'Tag',[views{i},'max']);
+        handles.(views{i}).range = [];
+        
+        set(handles.(views{i}).rangeButton,'Callback',@(hObject,~,~) hmViewManualRangeHandler(hObject,views{i}));
+        set(handles.(views{i}).minText,'Callback',@(hObject,~,~) hmViewMinHandler(hObject,views{i}));
+        set(handles.(views{i}).maxText,'Callback',@(hObject,~,~) hmViewMaxHandler(hObject,views{i}));
+    end
+    
+    set(handles.csd.rangeButton,'Enable','off');
+    
+    set(hmFig,'CloseRequestFcn',@closeHandler);
+    
+    guidata(hmFig,handles);
+    
+    guidata(rawfig,rawHandles);
+    
+    set(rawHandles.traceview,'Enable','on');
+    
+    refreshDataView(rawfig);
+end
+
+function closeHandler(hObject,~,~)
+    handles = guidata(hObject);
+    rawfig = handles.rawfig;
+    rawHandles = guidata(rawfig);
+    rawHandles.hmfig = gobjects;
+    set(rawHandles.traceview,'Enable','on');
+    guidata(rawfig,rawHandles);
+    delete(hObject);
+end
+

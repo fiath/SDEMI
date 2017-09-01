@@ -2,6 +2,10 @@ function newBuffer = downSampleBuffer(datafile,buffer,dataPerPixel)
 %DOWNSAMPLEBUFFER Summary of this function goes here
 %   Detailed explanation goes here
     bufferSize = size(buffer,2);
+    if bufferSize == 0
+        newBuffer = [];
+        return;
+    end
     if nargin<3
         dataPerPixel = datafile.dataResolution;
     end

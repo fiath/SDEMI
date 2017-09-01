@@ -33,6 +33,9 @@ function datafile = updateWindow(handles,newWindow,force)
         datafile.windowSize = datafile.dataWindow(2)-datafile.dataWindow(1)+1;
         datafile.windowUpdating = 0;
         
+        updateHeatmapViewWindow(datafile);
+
+        
         % we don't need pivotline
         % update pivot line
         %center = round((datafile.dataWindow(1) + datafile.dataWindow(2))/2/datafile.samplingRate);
@@ -84,9 +87,17 @@ function datafile = updateWindow(handles,newWindow,force)
     if datafile.filter.on && datafile.usingDownsampled
         error('Cannot use filtering while using downsampled  data!');
     end
+    
+    if datafile.usingDownsampled
+        datafile.lfpBuffer = 0.195*double(datafile.downsampled.data(:,beginBuffer+1:endBuffer));
+        datafile.muaBuffer = [];
+    else
+        datafile.lfpBuffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
+        datafile.muaBuffer = abs(filterBuffer(datafile,datafile.lfpBuffer));
+    end
+    
     if datafile.filter.on
         datafile.buffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
-        
         
         datafile.buffer = filterBuffer(datafile,datafile.buffer);
     elseif datafile.usingDownsampled
@@ -105,6 +116,8 @@ function datafile = updateWindow(handles,newWindow,force)
     datafile.dataResolution = dataPerPixel;
     if dataPerPixel > 8
         datafile.buffer = downSampleBuffer(datafile,datafile.buffer);
+        datafile.lfpBuffer = downSampleBuffer(datafile,datafile.lfpBuffer);
+        datafile.muaBuffer = downSampleBuffer(datafile,datafile.muaBuffer);
     end
     
     if ~datafile.filter.on
@@ -112,7 +125,7 @@ function datafile = updateWindow(handles,newWindow,force)
         datafile.buffer = 0.195*double(datafile.buffer);
     end
     
-    % apply amplited
+    % apply amplitude
     datafile.buffer = datafile.buffer*datafile.amplitude;
     
     next_active_offset = 1;
@@ -166,8 +179,13 @@ function datafile = updateWindow(handles,newWindow,force)
     datafile.bufferStart = beginBuffer;
     datafile.bufferEnd = endBuffer;
     
+    % calculate abs max values
+    datafile.lfpAbsMaxValue = max(max(abs(datafile.lfpBuffer)));
+    datafile.muaAbsMaxValue = max([max(max(datafile.muaBuffer)),0]);
+    
     % update spikeLines
     datafile = updateSpikes(datafile);
     fprintf('Finished reading. ');toc
-   
+    
+    plotHeatmapView(datafile);
    

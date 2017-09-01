@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 29-Aug-2017 11:46:10
+% Last Modified by GUIDE v2.5 31-Aug-2017 19:20:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -73,6 +73,7 @@ set(handles.rightspike,'Callback',@nextSpike);
 set(handles.currentspiketext,'Callback',@currentSpikeChangeHandler);
 set(handles.saveasimage,'Callback',@saveTraceImage);
 handles.stafig = gobjects;
+handles.hmfig = gobjects;
 
 handles.datafile = struct( 'fig',handles.figure1,... 
                     'ax',handles.axes1,...
@@ -92,6 +93,10 @@ handles.datafile = struct( 'fig',handles.figure1,...
                     'bufferStart',0,...
                     'bufferEnd',0,...
                     'buffer',[],... % #datapoints * 128
+                    'lfpAbsMaxValue',-1,...,
+                    'muaAbsMaxValue',-1,...
+                    'lfpBuffer',[],...
+                    'muaBuffer',[],...
                     'loadStart',0.25,... % if center of window is smaller than this
                     'loadEnd',0.75,... % if center of window is larger than this
                     'bufferSize',-1,... % the size of the buffer
@@ -119,6 +124,7 @@ handles.datafile = struct( 'fig',handles.figure1,...
                     'timeFormat','%dh%dm%d.%03ds',...
                     'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt,'active',0),...
                     'loadingSTA',0,...
+                    'loadingHM',0,...
                     'spikeLines',gobjects,...
                     'currentSpikeLine',gobjects,...
                     'currentSpike',-1,...
@@ -233,6 +239,9 @@ function closeHandler(hObject,eventdata)
     handles = guidata(hObject);
     if isgraphics(handles.stafig)
         close(handles.stafig);
+    end
+    if isgraphics(handles.hmfig)
+        close(handles.hmfig);
     end
     delete(hObject);
 
@@ -519,3 +528,23 @@ function currentspiketext_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --------------------------------------------------------------------
+function heatmapView_Callback(hObject, eventdata, handles)
+% hObject    handle to heatmapView (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    fprintf('HeatmapView open start\n');
+    handles = guidata(hObject);
+    handles.datafile.loadingHM = 1;
+    guidata(handles.figure1,handles);
+    openHeatmapView(handles.figure1);
+    handles = guidata(hObject);
+    handles.datafile.loadingHM = 0;
+    guidata(handles.figure1,handles);
+    fprintf('HeatmapView open end\n');
+    
+    
+    
+    
