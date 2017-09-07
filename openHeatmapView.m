@@ -15,9 +15,14 @@ function openHeatmapView(rawfig)
     for i=1:length(views)
         handles.(views{i}) = struct();
         handles.(views{i}).axes = findobj(hmFig,'Tag',[views{i},'axes']);
+        handles.(views{i}).panel = findobj(hmFig,'Tag',[views{i},'panel']);
+        handles.(views{i}).axesWidth = handles.(views{i}).axes.Position(3); % normalized
         handles.(views{i}).image = imagesc(handles.(views{i}).axes,[]);
-        C = colorbar(handles.(views{i}).axes);
-        C.UIContextMenu = '';
+        handles.(views{i}).colorbarWidth = 30; % pixel
+        handles.(views{i}).colorbarMargin = 10; % pixel
+        handles.(views{i}).colorbar = colorbar(handles.(views{i}).axes,'Location','manual','Units','pixels');
+        handles.(views{i}).colorbar.Position(3) = handles.(views{i}).colorbarWidth;
+        handles.(views{i}).colorbar.UIContextMenu = '';
         handles.(views{i}).rangeButton = findobj(hmFig,'Tag',[views{i},'rangebutton']);
         handles.(views{i}).minText = findobj(hmFig,'Tag',[views{i},'min']);
         handles.(views{i}).maxText = findobj(hmFig,'Tag',[views{i},'max']);
@@ -31,6 +36,7 @@ function openHeatmapView(rawfig)
     set(handles.csd.rangeButton,'Enable','off');
     
     set(hmFig,'CloseRequestFcn',@closeHandler);
+    set(hmFig,'ResizeFcn',@heatmapViewResizeHandler);
     
     guidata(hmFig,handles);
     
@@ -39,6 +45,7 @@ function openHeatmapView(rawfig)
     set(rawHandles.traceview,'Enable','on');
     
     refreshDataView(rawfig);
+    updateHeatmapViewAxes(hmFig);
 end
 
 function closeHandler(hObject,~,~)

@@ -117,7 +117,7 @@ function datafile = updateWindow(handles,newWindow,force)
     if dataPerPixel > 8
         datafile.buffer = downSampleBuffer(datafile,datafile.buffer);
         datafile.lfpBuffer = downSampleBuffer(datafile,datafile.lfpBuffer);
-        datafile.muaBuffer = downSampleBuffer(datafile,datafile.muaBuffer);
+        datafile.muaBuffer = downSampleBufferWithAvg(datafile,datafile.muaBuffer);
     end
     
     if ~datafile.filter.on

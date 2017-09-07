@@ -1,0 +1,19 @@
+function updateHeatmapViewAxes(fig)
+%UPDATEHEATMAPVIEWAXES Summary of this function goes here
+%   Detailed explanation goes here
+    handles = guidata(fig);
+    views = {'lfp','csd','mua'};
+    for i=1:length(views)
+        colorbarNormalized = (handles.(views{i}).colorbarWidth+...
+            handles.(views{i}).colorbarMargin)/fig.Position(3);
+        handles.(views{i}).axes.Position(3) = ...
+            max([0.1 handles.(views{i}).axesWidth-colorbarNormalized]);
+        handles.(views{i}).colorbar.Position([1 2 4]) = ...
+            [(handles.(views{i}).axes.Position(1)+handles.(views{i}).axes.Position(3))*fig.Position(3)+...
+            handles.(views{i}).colorbarMargin,...
+            handles.(views{i}).axes.Position(2)*fig.Position(4),...
+            handles.(views{i}).axes.Position(4)*fig.Position(4)];
+    end
+
+end
+

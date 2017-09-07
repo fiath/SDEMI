@@ -29,7 +29,8 @@ function setCurrentSpike(fig,spike)
     delete(handles.datafile.currentSpikeLine);
     handles.datafile.currentSpikeLine = line(handles.axes1,[spikeValue,spikeValue],...
                 [handles.datafile.ylim(1),handles.datafile.ylim(1) + ...
-                (handles.datafile.ylim(2)-handles.datafile.ylim(1))*0.05],'Color',[1 0 0],'hittest','off');
+                (handles.datafile.ylim(2)-handles.datafile.ylim(1))*0.05],...
+                'Color',[1 0 0],'hittest','off','LineWidth',2);
     guidata(fig,handles);
 end
 

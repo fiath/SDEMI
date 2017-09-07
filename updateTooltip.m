@@ -23,7 +23,8 @@ function updateTooltip(hObject)
         if handles.datafile.tooltip.active
             %fprintf('Double creation\n');
         end
-        handles.datafile.tooltip.line = line(handles.axes1,[C(1,1),C(1,1)],YLim,'Color',[0.5,0.5,0.5],'hittest','off');
+        handles.datafile.tooltip.line = line(handles.axes1,[C(1,1),C(1,1)],YLim,...
+            'Color',[0.5,0.5,0.5],'hittest','off','PickableParts','none');
         handles.datafile.tooltip.active = 1;
         axPos = get(handles.axes1,'Position');
         figPos = get(handles.figure1,'Position');
