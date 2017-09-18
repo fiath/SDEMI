@@ -3,7 +3,7 @@ function updateTooltip(hObject)
 %   Detailed explanation goes here
     %fprintf('Update tooltip start\n');
     handles = guidata(hObject);
-    if handles.datafile.loadingSTA || handles.datafile.loadingHM
+    if handles.datafile.loadingSTA || handles.datafile.loadingHM || handles.datafile.loadingCL
         return;
     end
 

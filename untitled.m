@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 31-Aug-2017 19:20:01
+% Last Modified by GUIDE v2.5 18-Sep-2017 10:20:42
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -74,6 +74,7 @@ set(handles.currentspiketext,'Callback',@currentSpikeChangeHandler);
 set(handles.saveasimage,'Callback',@saveTraceImage);
 handles.stafig = gobjects;
 handles.hmfig = gobjects;
+handles.clfig = gobjects;
 
 handles.datafile = struct( 'fig',handles.figure1,... 
                     'ax',handles.axes1,...
@@ -125,6 +126,7 @@ handles.datafile = struct( 'fig',handles.figure1,...
                     'tooltip',struct('line',gobjects,'txt',handles.tooltiptxt,'active',0),...
                     'loadingSTA',0,...
                     'loadingHM',0,...
+                    'loadingCL',0,...
                     'spikeLines',gobjects,...
                     'currentSpikeLine',gobjects,...
                     'currentSpike',-1,...
@@ -242,6 +244,9 @@ function closeHandler(hObject,eventdata)
     end
     if isgraphics(handles.hmfig)
         close(handles.hmfig);
+    end
+    if isgraphics(handles.clfig)
+        close(handles.clfig);
     end
     delete(hObject);
 
@@ -548,3 +553,19 @@ function heatmapView_Callback(hObject, eventdata, handles)
     
     
     
+
+
+% --------------------------------------------------------------------
+function clusterview_Callback(hObject, eventdata, handles)
+% hObject    handle to clusterview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    fprintf('ClusterView open start\n');
+    handles = guidata(hObject);
+    handles.datafile.loadingCL = 1;
+    guidata(handles.figure1,handles);
+    openClusterView(handles.figure1);
+    handles = guidata(hObject);
+    handles.datafile.loadingCL = 0;
+    guidata(handles.figure1,handles);
+    fprintf('ClusterView open end\n');

@@ -66,7 +66,7 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
         if spike + from  > 0 && spike + to <= samplesPerChannel
             fseek(m,2*(spike-1+from)*numberOfChannels,'bof');
             tmp = fread(m,[numberOfChannels,range],'int16');
-            tmp = dtrend(tmp','linear')';
+            tmp = detrend(tmp','linear')';
             eventFileList(currEv).data = eventFileList(currEv).data + ...
                 0.195*tmp./length(eventFileList(currEv).spikes);
         end
@@ -109,7 +109,7 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
 %         if spike + from  > 0 && spike + to <= samplesPerChannel
 %             fseek(m,2*(spike-1+from)*numberOfChannels,'bof');
 %             tmp = fread(m,[numberOfChannels,range],'int16');
-%             tmp = dtrend(tmp','linear')';
+%             tmp = detrend(tmp','linear')';
 %             eventFileList(currEv).variance = eventFileList(currEv).variance + ...
 %                 ((0.195*tmp - eventFileList(currEv).data).^2)./length(eventFileList(currEv).spikes);
 %         end
