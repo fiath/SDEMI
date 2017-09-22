@@ -19,6 +19,7 @@ function openClusterView(rawfig)
         % directory contains no .mat files.
         return
     end
+    dataList = dataList(1:3);
 
     clFig = matlab.hg.internal.openfigLegacy('clusterview', 'reuse', 'visible');
     rawHandles.clfig = clFig;
@@ -33,6 +34,20 @@ function openClusterView(rawfig)
     handles.dropDown = findobj(clFig,'Tag','dropdown');
     handles.activeSpikeText = findobj(clFig,'Tag','activespike');
     handles.allSpikeText = findobj(clFig,'Tag','allspikes');
+    handles.stateLabel = findobj(clFig,'Tag','statelabel');
+    handles.spikeStateDropDown = findobj(clFig,'Tag','editspike');
+    handles.showReassignedMenuItem = findobj(clFig,'Tag','showreassigned');
+    
+    function norm = getNormPos(obj)
+        norm = [obj.Position(1)/clFig.Position(3),obj.Position(2)/clFig.Position(4)];
+    end
+    
+    handles.dropDownNormPos = getNormPos(handles.dropDown);
+    handles.activeSpikeTextNormPos = getNormPos(handles.activeSpikeText);
+    handles.allSpikeTextNormPos = getNormPos(handles.allSpikeText);
+    handles.stateLabelNormPos = getNormPos(handles.stateLabel);
+    handles.spikeStateDropDownNormPos = getNormPos(handles.spikeStateDropDown);
+    
     offset = 0;
     for i=1:length(groups)
         handles.(groups{i}) = struct();
@@ -101,7 +116,9 @@ function openClusterView(rawfig)
         handles.eventFiles(handles.unitNames{i}) = ...
             struct( 'spikes',spikes,...
                     'activeSpike',1,...
-                    'activePosition',80);
+                    'activePosition',80,...
+                    'assignedTo',struct('spikeIds',[],'src',[]),...
+                    'assignedFrom',struct('spikeIds',[],'dst',[]));
     end
     handles.activeUnit = 1;
     
@@ -111,6 +128,8 @@ function openClusterView(rawfig)
     set(clFig,'ResizeFcn',@clusterViewResizeHandler);
     set(handles.dropDown,'String',handles.unitNames);
     set(handles.dropDown,'Callback',@clusterDropDownHandler);
+    set(handles.showReassignedMenuItem,'Callback',@toggleShowReassigned);
+    set(handles.spikeStateDropDown,'Callback',@spikeStateDropDownHandler);
     set(handles.activeSpikeText,'Callback',@clActiveSpikeChangeHandler);
     set(clFig,'WindowKeyPressFcn',@clKeyDownHandler);
     set(clFig,'WindowKeyReleaseFcn',@clKeyUpHandler);
@@ -157,10 +176,10 @@ function clKeyDownHandler(hObject,eventdata,~)
     if ~handles.modifiers.ctrl
         if strcmp(eventdata.Key,'leftarrow') == 1 && unit.activeSpike > 1
             % select the previous unit
-            changeActiveSpike(handles.clfig,unit.activeSpike-1);
+            changeToNextSpike(handles.clfig,'backward');
         elseif strcmp(eventdata.Key,'rightarrow') == 1 && unit.activeSpike < length(unit.spikes)
             % select the next unit
-            changeActiveSpike(handles.clfig,unit.activeSpike+1);
+            changeToNextSpike(handles.clfig,'forward');
         end
     else
         if strcmp(eventdata.Key,'leftarrow') == 1 && unit.activePosition > 1

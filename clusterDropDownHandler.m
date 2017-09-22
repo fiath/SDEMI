@@ -2,9 +2,7 @@ function clusterDropDownHandler(hObject,~,~)
 %CLUSTERDROPDOWNHANDLER Summary of this function goes here
 %   Detailed explanation goes here
     handles = guidata(hObject);
-    handles.activeUnit = get(hObject,'Value');
-    guidata(hObject,handles);
-    updateClusterView(handles.clfig);
+    changeActiveUnit(handles.clfig,get(hObject,'Value'));
 
     set(hObject,'Enable','off');
     drawnow;
