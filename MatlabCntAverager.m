@@ -31,9 +31,9 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
             if ~ischar(line)
                 break
             end
-            s = str2num(line);
+            s = sscanf(line,'%*f%u');
             j = j+1;
-            eventFileList(i).spikes(j) = s(6);
+            eventFileList(i).spikes(j) = s(end);
         end
         if j~= 0
             eventFileList(i).spikeIndex = 1;
@@ -138,7 +138,8 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
 %         end
         
         meanSpikeWaveformDetrended = eventFileList(i).data;
-        save([outputDir eventFileList(i).dir.name '.mat'], 'meanSpikeWaveformDetrended');
+        spikes = eventFileList(i).spikes;
+        save([outputDir eventFileList(i).dir.name '.mat'], 'meanSpikeWaveformDetrended','spikes');
         clear meanSpikeWaveformDetrended;
     end
    

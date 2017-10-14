@@ -57,7 +57,7 @@ function loadSTA(fig)
     handles.stafig = stafig;
     handles.samplingRate = samplingRate;
     handles.column = answer;
-    % <String,[Int]> maps the name of the file to the array of spike
+    % <String,[Int]> maps the name of the file to the array of spikes
     % positions in datapoints
     handles.eventFiles = containers.Map;
     handles.heatmapRange = [];
@@ -135,7 +135,11 @@ function loadSTA(fig)
        data = load([dirpath ids{i,1}]);
        handles.unitNames{i} = ids{i,1};
        handles.data = cat(3,handles.data,data.meanSpikeWaveformDetrended);
+       eventFileName = [handles.dirpath,strtok(handles.unitNames{i},'.'),'.ev2'];
+       handles.eventFiles(eventFileName) = data.spikes;
     end
+    
+    
     handles.dropDown = findobj(stafig,'Tag','unitselector');
     set(handles.dropDown,'String',handles.unitNames);
     set(handles.dropDown,'Callback',@dropdownHandler);

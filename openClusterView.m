@@ -8,7 +8,7 @@ function openClusterView(rawfig)
     
     startdir = rawHandles.datafile.filedir(1:end-1);
     startdir = startdir(1:find(startdir=='/',1,'last')-1);
-    dirpath = uigetdir(startdir,'Select the directory containing the .ev2 files');
+    dirpath = uigetdir(startdir,'Select the directory containing the .ev2 files or .ev2.mat files');
     if dirpath == 0
         return;
     end
@@ -16,10 +16,17 @@ function openClusterView(rawfig)
     dirpath = [dirpath '/'];
     dataList = dir([dirpath '*.ev2']);
     if isempty(dataList)
-        % directory contains no .mat files.
-        return
+        % directory contains no .ev2 files.
+        dataList = dir([dirpath '*.mat']);
+        if isempty(dataList)
+            % directory contains no .mat files either.
+            return
+        end
+        usingMatFiles = true;
+    else
+        usingMatFiles = false;
     end
-    dataList = dataList(1:3);
+    dataList = dataList(1:3); % for live comment out
 
     clFig = matlab.hg.internal.openfigLegacy('clusterview', 'reuse', 'visible');
     rawHandles.clfig = clFig;
@@ -89,36 +96,63 @@ function openClusterView(rawfig)
     % load EVENT FILES 
     handles.dirpath = dirpath;
     ids = cell(length(dataList),2);
-    regex = '.*([^0-9]|^)(?<id>[0-9]+)\.ev2$';
-    for i=1:length(ids)
-        ids{i,1} = dataList(i).name;
-        m = regexp(ids{i,1},regex,'names');
-        if isempty(m)
-            error('.ev2 file is of invalid form');
+    if ~usingMatFiles
+        regex = '.*([^0-9]|^)(?<id>[0-9]+)\.ev2$';
+        for i=1:length(ids)
+            ids{i,1} = dataList(i).name;
+            m = regexp(ids{i,1},regex,'names');
+            if isempty(m)
+                error('.ev2 file is of invalid form');
+            end
+            ids{i,2} = str2double(m.id);
         end
-        ids{i,2} = str2double(m.id);
+    else
+        regex = '.*([^0-9]|^)(?<id>[0-9]+)\.ev2\.mat$';
+        for i=1:length(ids)
+            ids{i,1} = dataList(i).name;
+            m = regexp(ids{i,1},regex,'names');
+            if isempty(m)
+                error('.mat file is of invalid form');
+            end
+            ids{i,2} = str2double(m.id);
+        end
     end
     ids = sortrows(ids,2);
     handles.unitNames = cell(1,length(dataList));
     handles.eventFiles = containers.Map;
-    for i=1:length(ids)
-        handles.unitNames{i} = ids{i,1};
-        filepath = [handles.dirpath, handles.unitNames{i}];
-        f = fopen(filepath,'r');
-        spikes = [];
-        l = fgetl(f);
-        while ischar(l)
-            dp = sscanf(l,'%d %d %d %d %f %d');
-            spikes = [spikes,dp(6)];
+    if ~usingMatFiles
+        for i=1:length(ids)
+            handles.unitNames{i} = ids{i,1};
+            filepath = [handles.dirpath, handles.unitNames{i}];
+            f = fopen(filepath,'r');
+            spikes = [];
             l = fgetl(f);
+            while ischar(l)
+                dp = sscanf(l,'%d %d %d %d %f %d');
+                spikes = [spikes,dp(6)];
+                l = fgetl(f);
+            end
+            fclose(f);
+            handles.eventFiles(handles.unitNames{i}) = ...
+                struct( 'spikes',spikes,...
+                        'activeSpike',1,...
+                        'activePosition',80,...
+                        'assignedTo',struct('spikeIds',[],'src',[]),...
+                        'assignedFrom',struct('spikeIds',[],'dst',[]));
         end
-        fclose(f);
-        handles.eventFiles(handles.unitNames{i}) = ...
-            struct( 'spikes',spikes,...
-                    'activeSpike',1,...
-                    'activePosition',80,...
-                    'assignedTo',struct('spikeIds',[],'src',[]),...
-                    'assignedFrom',struct('spikeIds',[],'dst',[]));
+    else
+        for i=1:length(ids)
+            handles.unitNames{i} = ids{i,1};
+            filepath = [handles.dirpath, handles.unitNames{i}];
+            data = load(filepath);
+            spikes = data.spikes;
+            handles.eventFiles(handles.unitNames{i}) = ...
+                struct( 'spikes',spikes,...
+                        'activeSpike',1,...
+                        'activePosition',80,...
+                        'assignedTo',struct('spikeIds',[],'src',[]),...
+                        'assignedFrom',struct('spikeIds',[],'dst',[]));
+        end
     end
     handles.activeUnit = 1;
     
