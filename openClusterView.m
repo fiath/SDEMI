@@ -26,7 +26,7 @@ function openClusterView(rawfig)
     else
         usingMatFiles = false;
     end
-    dataList = dataList(1:3); % for live comment out
+    %dataList = dataList(1:3); % for live comment out
 
     clFig = matlab.hg.internal.openfigLegacy('clusterview', 'reuse', 'visible');
     rawHandles.clfig = clFig;

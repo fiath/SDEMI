@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 18-Sep-2017 10:20:42
+% Last Modified by GUIDE v2.5 22-Oct-2017 14:57:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -569,3 +569,12 @@ function clusterview_Callback(hObject, eventdata, handles)
     handles.datafile.loadingCL = 0;
     guidata(handles.figure1,handles);
     fprintf('ClusterView open end\n');
+
+
+% --------------------------------------------------------------------
+function statistics_Callback(hObject, eventdata, handles)
+% hObject    handle to statistics (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
+    statView(handles.figure1);

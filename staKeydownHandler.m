@@ -8,7 +8,10 @@ function staKeydownHandler(hObject,eventdata,~)
     elseif strcmp(eventdata.Key,'downarrow') == 1 && handles.unit < size(handles.data,3)
         % select the next unit
         plotSTA(handles.stafig,handles.unit+1);
+    elseif strcmp(eventdata.Key,'leftarrow') == 1
+        wfScrollHandler(hObject,-1);
+    elseif strcmp(eventdata.Key,'rightarrow') == 1
+        wfScrollHandler(hObject,1);
     end
-
 end
 

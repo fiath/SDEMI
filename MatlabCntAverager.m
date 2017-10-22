@@ -3,6 +3,7 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
     from = -80;
     to = 80;
     range = to-from+1;
+    window = [from,to];
 
     numberOfChannels = 128;
     resolution = 2;
@@ -139,7 +140,9 @@ function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgD
         
         meanSpikeWaveformDetrended = eventFileList(i).data;
         spikes = eventFileList(i).spikes;
-        save([outputDir eventFileList(i).dir.name '.mat'], 'meanSpikeWaveformDetrended','spikes');
+        measurementLength = samplesPerChannel/samplingRate;
+        save([outputDir eventFileList(i).dir.name '.mat'], 'meanSpikeWaveformDetrended',...
+            'spikes','samplingRate','numberOfChannels','window','measurementLength');
         clear meanSpikeWaveformDetrended;
     end
    
