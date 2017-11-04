@@ -22,15 +22,19 @@ function loadSTA(fig)
         return;
     end
 
-    startdir = handles.datafile.filedir(1:end-1);
-    startdir = startdir(1:find(startdir=='/',1,'last')-1);
+    if ~handles.datLoaded
+        startdir = '~';
+    else
+        startdir = handles.datafile.filedir(1:end-1);
+        startdir = startdir(1:find(startdir=='/',1,'last')-1);
+    end
     dirpath = uigetdir(startdir,'Select the directory containing the .mat files');
     if dirpath == 0
         return;
     end
     
     dirpath = [dirpath '/'];
-    dataList = dir([dirpath '*.mat']);
+    dataList = dir([dirpath '*.ev2.mat']);
     if isempty(dataList)
         % directory contains no .mat files.
         return
@@ -40,8 +44,10 @@ function loadSTA(fig)
         close(handles.stafig);
     end
     
+    
     % set up gui
     stafig = matlab.hg.internal.openfigLegacy('sta', 'reuse', 'visible');
+    set(stafig,'Name',['STA Viewer (',dirpath,')']);
     set(stafig,'PaperPositionMode','auto');
     set(stafig,'CloseRequestFcn',@closeHandler);
     set(stafig,'ResizeFcn',@staResizeHandler);
@@ -50,7 +56,7 @@ function loadSTA(fig)
     set(stafig,'WindowButtonMotionFcn',@stafigMouseMoveHandler);
     set(stafig,'WindowKeyPressFcn',@staKeydownHandler);
     handles.stafig = stafig;
-    set(handles.traceview,'Enable','off');
+    %set(handles.traceview,'Enable','off');
     samplingRate = handles.datafile.samplingRate;
     guidata(fig,handles);
     handles = struct('rawfig',fig);
@@ -158,7 +164,7 @@ function closeHandler(hObject,~,~)
     rawfig = handles.rawfig;
     rawHandles = guidata(rawfig);
     rawHandles.stafig = gobjects;
-    set(rawHandles.traceview,'Enable','on');
+    %set(rawHandles.traceview,'Enable','on');
     guidata(rawfig,rawHandles);
     delete(hObject);
     rawHandles = guidata(rawfig);

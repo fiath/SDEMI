@@ -1,7 +1,10 @@
-function datafile = updateSpikes(datafile)
+function datafile = updateSpikes(datafile,force)
 %UPDATESPIKES Summary of this function goes here
 %   Detailed explanation goes here
     handles = guidata(datafile.fig);
+    if ~handles.datLoaded && (nargin < 2 || ~force)
+        return;
+    end
     stafig = handles.stafig;
     ax = handles.axes1;
     % remove spikeLines

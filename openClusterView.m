@@ -17,7 +17,7 @@ function openClusterView(rawfig)
     dataList = dir([dirpath '*.ev2']);
     if isempty(dataList)
         % directory contains no .ev2 files.
-        dataList = dir([dirpath '*.mat']);
+        dataList = dir([dirpath '*.ev2.mat']);
         if isempty(dataList)
             % directory contains no .mat files either.
             return
@@ -30,7 +30,7 @@ function openClusterView(rawfig)
 
     clFig = matlab.hg.internal.openfigLegacy('clusterview', 'reuse', 'visible');
     rawHandles.clfig = clFig;
-    set(rawHandles.traceview,'Enable','off');
+    set(rawHandles.clusterview,'Enable','off');
     
     handles = struct('clfig',clFig,'rawfig',rawfig);
     handles.range = [-80 80];
@@ -173,7 +173,7 @@ function openClusterView(rawfig)
     
     guidata(rawfig,rawHandles);
     
-    set(rawHandles.traceview,'Enable','on');
+    %set(rawHandles.traceview,'Enable','on');
     
 %     refreshDataView(rawfig);
     changeActiveUnit(clFig,1);
@@ -185,7 +185,7 @@ function closeHandler(hObject,~,~)
     rawfig = handles.rawfig;
     rawHandles = guidata(rawfig);
     rawHandles.clfig = gobjects;
-    set(rawHandles.traceview,'Enable','on');
+    set(rawHandles.clusterview,'Enable','on');
     guidata(rawfig,rawHandles);
     delete(hObject);
 end

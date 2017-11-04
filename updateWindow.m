@@ -184,7 +184,7 @@ function datafile = updateWindow(handles,newWindow,force)
     datafile.muaAbsMaxValue = max([max(max(datafile.muaBuffer)),0]);
     
     % update spikeLines
-    datafile = updateSpikes(datafile);
+    datafile = updateSpikes(datafile,1);
     fprintf('Finished reading. ');toc
     
     plotHeatmapView(datafile);

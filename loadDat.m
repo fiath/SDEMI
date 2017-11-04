@@ -17,6 +17,7 @@ function loadDat(fig)
     datafile = handles.datafile;
     
     datafile.filedir = path;
+    set(fig,'Name',filepath);
     datafile.length = file.bytes/datafile.numberOfChannels/datafile.resolution;
     % the whole file is loaded at once
     %datafile.bufferSize = min(datafile.maxBufferSize,datafile.length);
@@ -49,7 +50,7 @@ function loadDat(fig)
         datafile.downsampled = load([datafile.filedir downSampledFileName]);
         datafile.maxWindowSize = 200000;
     catch
-        warning('No downsampled file in %s with name %s',dir2,matOneList(i).name);
+        warning('No downsampled file in %s with name %s',datafile.filedir,downSampledFileName);
         datafile.downsampled = [];
         datafile.maxWindowSize = 100000;
     end
@@ -66,6 +67,8 @@ function loadDat(fig)
     guidata(fig,handles);
     
     showAllChildren(fig);
-    set(handles.waveformview,'Enable','on');
+    set(handles.clusterview,'Enable','on');
+    set(handles.heatmapView,'Enable','on');
+    set(handles.traceview,'Enable','off');
 end
 

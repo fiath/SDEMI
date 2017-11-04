@@ -8,7 +8,7 @@ function openHeatmapView(rawfig)
 
     hmFig = matlab.hg.internal.openfigLegacy('heatmapview', 'reuse', 'visible');
     rawHandles.hmfig = hmFig;
-    set(rawHandles.traceview,'Enable','off');
+    set(rawHandles.heatmapView,'Enable','off');
     
     handles = struct('hmfig',hmFig,'rawfig',rawfig);
     views = {'lfp','csd','mua'};
@@ -42,7 +42,7 @@ function openHeatmapView(rawfig)
     
     guidata(rawfig,rawHandles);
     
-    set(rawHandles.traceview,'Enable','on');
+    %set(rawHandles.traceview,'Enable','on');
     
     refreshDataView(rawfig);
     updateHeatmapViewAxes(hmFig);
@@ -53,7 +53,7 @@ function closeHandler(hObject,~,~)
     rawfig = handles.rawfig;
     rawHandles = guidata(rawfig);
     rawHandles.hmfig = gobjects;
-    set(rawHandles.traceview,'Enable','on');
+    set(rawHandles.heatmapView,'Enable','on');
     guidata(rawfig,rawHandles);
     delete(hObject);
 end

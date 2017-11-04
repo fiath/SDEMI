@@ -12,6 +12,9 @@ function autocorr = loadAutoCorr(fig,filepath,binsize,numOfBins)
         activeSpikes = activeSpikes(activeSpikes >= (pos - binsize*numOfBins));
         dist = ceil((pos - activeSpikes)/binsize);
         if ~all(dist)
+            % multiple spikes at the same time from the same neuron, ignore
+            % spike
+            continue;
             error('Multiple spikes at the same time from the same neuron');
         end
         for j=1:length(dist)
