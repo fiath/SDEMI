@@ -8,11 +8,12 @@ function updateHeatmapViewRange(fig,datafile,axesId,range)
             if strcmp(axesId,'lfp')
                 max_abs_v = datafile.lfpAbsMaxValue;
                 range = [-max_abs_v,max_abs_v];
+            elseif strcmp(axesId,'csd')
+                max_abs_v = datafile.csdAbsMaxValue;
+                range = [-max_abs_v,max_abs_v];
             elseif strcmp(axesId,'mua')
                 max_abs_v = datafile.muaAbsMaxValue;
                 range = [0,max_abs_v];
-            elseif strcmp(axesId,'csd')
-                return;
             end
         else
             range = handles.(axesId).range;

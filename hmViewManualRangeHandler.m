@@ -1,9 +1,6 @@
 function hmViewManualRangeHandler(hObject,axesId)
 %HEATMAPRANGEHANDLER Summary of this function goes here
 %   axesId is 'lfp', 'csd' or 'mua'
-    if strcmp(axesId,'csd')
-        return;
-    end
     handles = guidata(hObject);
     state = get(hObject,'Value');
     max_state = get(hObject,'Max');

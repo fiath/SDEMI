@@ -33,7 +33,12 @@ function openHeatmapView(rawfig)
         set(handles.(views{i}).maxText,'Callback',@(hObject,~,~) hmViewMaxHandler(hObject,views{i}));
     end
     
-    set(handles.csd.rangeButton,'Enable','off');
+    % load ldr files
+    handles.ldr_csd = loadLDR('./CSD32x3.ldr');
+    handles.ldr_hamming = loadLDR('./csdh30.ldr');
+    handles.ldr_composite = handles.ldr_hamming*handles.ldr_csd;
+    
+    %set(handles.csd.rangeButton,'Enable','off');
     
     set(hmFig,'CloseRequestFcn',@closeHandler);
     set(hmFig,'ResizeFcn',@heatmapViewResizeHandler);

@@ -90,9 +90,17 @@ function datafile = updateWindow(handles,newWindow,force)
     
     if datafile.usingDownsampled
         datafile.lfpBuffer = 0.195*double(datafile.downsampled.data(:,beginBuffer+1:endBuffer));
+        datafile.csdBuffer = [];
         datafile.muaBuffer = [];
     else
         datafile.lfpBuffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
+        rawHandles = guidata(datafile.fig);
+        if isgraphics(rawHandles.hmfig)
+            heatmapHandles = guidata(rawHandles.hmfig);
+            datafile.csdBuffer = heatmapHandles.ldr_composite*datafile.lfpBuffer(1:4:128,:);
+        else
+            datafile.csdBuffer = [];
+        end
         datafile.muaBuffer = abs(filterBuffer(datafile,datafile.lfpBuffer));
     end
     
@@ -117,6 +125,7 @@ function datafile = updateWindow(handles,newWindow,force)
     if dataPerPixel > 8
         datafile.buffer = downSampleBuffer(datafile,datafile.buffer);
         datafile.lfpBuffer = downSampleBuffer(datafile,datafile.lfpBuffer);
+        datafile.csdBuffer = downSampleBuffer(datafile,datafile.csdBuffer);
         datafile.muaBuffer = downSampleBufferWithAvg(datafile,datafile.muaBuffer);
     end
     
@@ -181,6 +190,7 @@ function datafile = updateWindow(handles,newWindow,force)
     
     % calculate abs max values
     datafile.lfpAbsMaxValue = max(max(abs(datafile.lfpBuffer)));
+    datafile.csdAbsMaxValue = max([max(max(abs(datafile.csdBuffer))),0]);
     datafile.muaAbsMaxValue = max([max(max(datafile.muaBuffer)),0]);
     
     % update spikeLines

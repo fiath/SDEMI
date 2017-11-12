@@ -9,7 +9,7 @@ function updateHeatmapViewWindow(datafile)
        
     hmHandles = guidata(handles.hmfig);
     window = datafile.dataWindow/datafile.samplingRate;
-    views = {'lfp','mua'};
+    views = {'lfp','csd','mua'};
     for i=1:length(views)
         fprintf('Moving window for %s to [%f,%f]\n',views{i},window(1),window(2));
         set(hmHandles.(views{i}).axes,'XLim',window);
