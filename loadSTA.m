@@ -142,7 +142,10 @@ function loadSTA(fig)
        handles.unitNames{i} = ids{i,1};
        handles.data = cat(3,handles.data,data.meanSpikeWaveformDetrended);
        eventFileName = [handles.dirpath,strtok(handles.unitNames{i},'.'),'.ev2'];
-       handles.eventFiles(eventFileName) = data.spikes;
+       if isfield(data,'spikes')
+            handles.eventFiles(eventFileName) = data.spikes;
+            handles.measurementLength = data.measurementLength;
+       end
     end
     
     

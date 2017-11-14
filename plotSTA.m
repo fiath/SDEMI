@@ -54,14 +54,24 @@ function plotSTA(fig,unit)
     
     unitName = handles.unitNames{handles.unit};
     evFilePath = [handles.dirpath,strtok(unitName,'.'),'.ev2'];
-    numOfSpikes = length(handles.eventFiles(evFilePath));
+    numOfSpikes = length(getSpikes(fig,evFilePath));
     
     %output information
     traceHandles = guidata(handles.rawfig);
     % lenght of the recording in seconds
-    time = traceHandles.datafile.length/traceHandles.datafile.samplingRate;
+    if isfield(handles,'measurementLength')
+        time = handles.measurementLength;
+    else
+        time = traceHandles.datafile.length/traceHandles.datafile.samplingRate;
+    end
     set(handles.spikenumber,'String',['Number of spikes: ',num2str(numOfSpikes)]);
-    set(handles.spikefrequency,'String',['Spiking frequency: ',num2str(numOfSpikes/time),'Hz']);
+    if time < 0
+        % .dat file is not loaded
+        set(handles.spikefrequency,'String',['Spiking frequency: -']);
+    else
+        set(handles.spikefrequency,'String',['Spiking frequency: ',num2str(numOfSpikes/time),'Hz']);
+        % .dat file is loaded
+    end
     [min_channel,min_index] = ind2sub(size(data),min_index);
     [max_channel,max_index] = ind2sub(size(data),max_index);
     set(handles.spikemax,'String',['Maximum: ',num2str(max_v),' at ',num2str(max_index),'@',num2str(max_channel)]);

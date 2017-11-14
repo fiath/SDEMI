@@ -6,7 +6,7 @@ function [spikes,startIndex] = getSpikesInScope(stafig,datafile,from,to)
     % name of the active unit
     evFilePath = handles.unitNames{handles.unit};
     evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
-    allSpikes = handles.eventFiles(evFilePath);
+    allSpikes = getSpikes(stafig, evFilePath);
     if ~datafile.usingDownsampled
         spikes = allSpikes(allSpikes>from & allSpikes <= to);
         startIndex = find(allSpikes>from,1,'first');

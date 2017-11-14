@@ -1,12 +1,13 @@
 function changeActivePosition(clfig,pos)
 %CHANGEACTIVESPIKE Summary of this function goes here
 %   Detailed explanation goes here
+% belongs to clusterview
     handles = guidata(clfig);
     s = handles.eventFiles(handles.unitNames{handles.activeUnit});
     size = handles.range(2)-handles.range(1)+1;
     if pos < 1
         pos = 1;
-    elseif pos > size;
+    elseif pos > size
         pos = size;
     end
     unit = handles.eventFiles(handles.unitNames{handles.activeUnit});

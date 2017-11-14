@@ -6,7 +6,7 @@ function spikeValue = getSpikesAt(stafig,datafile,position)
     % name of the active unit
     evFilePath = handles.unitNames{handles.unit};
     evFilePath = [handles.dirpath,strtok(evFilePath,'.'),'.ev2'];
-    allSpikes = handles.eventFiles(evFilePath);
+    allSpikes = getSpikes(stafig,evFilePath);
     spikeValue = allSpikes(position);
     if ~datafile.usingDownsampled
         spikeValue = spikeValue/datafile.samplingRate;

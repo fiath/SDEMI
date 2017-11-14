@@ -6,7 +6,7 @@ function spikes = getSpikes( stafig,filepath )
         % event file has already been loaded
         spikes = handles.eventFiles(filepath);
     else
-        error('Spikes should have been read from the .mat file in @loadSTA');
+        %error('Spikes should have been read from the .mat file in @loadSTA');
         f = fopen(filepath,'r');
         spikes = [];
         l = fgetl(f);
