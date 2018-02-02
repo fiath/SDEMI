@@ -97,7 +97,10 @@ function datafile = updateWindow(handles,newWindow,force)
         rawHandles = guidata(datafile.fig);
         if isgraphics(rawHandles.hmfig)
             heatmapHandles = guidata(rawHandles.hmfig);
-            datafile.csdBuffer = heatmapHandles.ldr_composite*datafile.lfpBuffer(1:4:128,:);
+			datafile.csdBuffer = [];
+			% temporarily disable CSD as we do not know the structure of an
+			% electrode
+            %datafile.csdBuffer = heatmapHandles.ldr_composite*datafile.lfpBuffer(1:4:128,:);
         else
             datafile.csdBuffer = [];
         end

@@ -78,11 +78,6 @@ function plotSTA(fig,unit)
     set(handles.spikemin,'String',['Minimum: ',num2str(min_v),' at ',num2str(min_index),'@',num2str(min_channel)]);
     
     %update traceview's spikeLines
-    rawHandles = guidata(handles.rawfig);
-    rawHandles.datafile.allSpikeCount = numOfSpikes;
-    rawHandles.datafile.currentSpike = 1;
-    rawHandles.datafile = updateSpikes(rawHandles.datafile);
-    guidata(handles.rawfig,rawHandles);
-    updateSpikeSelector(rawHandles);
+    setActiveEventFile(handles.rawfig,evFilePath);
 end
 

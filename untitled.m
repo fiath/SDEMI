@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 04-Nov-2017 19:03:06
+% Last Modified by GUIDE v2.5 02-Feb-2018 12:00:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -72,15 +72,19 @@ set(handles.leftspike,'Callback',@previousSpike);
 set(handles.rightspike,'Callback',@nextSpike);
 set(handles.currentspiketext,'Callback',@currentSpikeChangeHandler);
 set(handles.saveasimage,'Callback',@saveTraceImage);
+set(handles.SpikeModal,'Callback',@openSpikeModal);
+set(handles.SpikeEdit,'Callback',@openEventListEditor);
 handles.stafig = gobjects;
 handles.hmfig = gobjects;
 handles.clfig = gobjects;
+handles.spikemodal = gobjects;
+handles.eventlisteditor = gobjects;
 
 handles.datafile = struct( 'fig',handles.figure1,... 
                     'ax',handles.axes1,...
                     'downsampled',[],...
                     'usingDownsampled',0,...
-                    'numberOfChannels',128,...
+                    'numberOfChannels',varargin{1},...
                     'resolution',2,...
                     'samplingRate',20000,...
                     'amplitude',1,...
@@ -130,7 +134,10 @@ handles.datafile = struct( 'fig',handles.figure1,...
                     'spikeLines',gobjects,...
                     'currentSpikeLine',gobjects,...
                     'currentSpike',-1,...
-                    'allSpikeCount',-1);
+                    'allSpikeCount',-1,...
+                    ... % -1 in a Spikes indicates that the data is present in stafig
+                    'eventFiles',containers.Map,... % String->{Spikes:[],Position:-1,Visible:Bool,Color:'',Above:Bool,SpikeLines:gobjects}
+                    'activeEventFile',-1);
 
 set(handles.axes1,'YLimMode','manual');
 set(handles.axes1,'XLimMode','manual');
@@ -147,7 +154,7 @@ handles.datafile.filter.B = B;
 
 % Update handles structure
 guidata(hObject, handles);
-setSpikeSelectorState(handles,'off');
+updateSpikeSelector(handles);
 %loadSTA(hObject,'/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/mat/');
 
 function keydownHandler(hObject, eventdata, handles)

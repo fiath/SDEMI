@@ -146,6 +146,7 @@ function loadSTA(fig)
             handles.eventFiles(eventFileName) = data.spikes;
             handles.measurementLength = data.measurementLength;
        end
+       registerEventFile(handles.rawfig,eventFileName);
     end
     
     
@@ -159,7 +160,6 @@ function loadSTA(fig)
     set(handles.dropDown,'Value',1);
     set(handles.totalDP,'String',['/ ',num2str(size(handles.data,2))]);
     plotSTA(stafig,1);
-    setSpikeSelectorState(rawHandles,'on');
 end
 
 function closeHandler(hObject,~,~)
@@ -170,12 +170,14 @@ function closeHandler(hObject,~,~)
     %set(rawHandles.traceview,'Enable','on');
     guidata(rawfig,rawHandles);
     delete(hObject);
+    
+    eventFiles = handles.eventFiles.keys;
+    for i=1:length(eventFiles)
+        unregisterEventFile(rawfig,eventFiles{i},1);
+    end
     rawHandles = guidata(rawfig);
     rawHandles.datafile = updateSpikes(rawHandles.datafile);
-    rawHandles.datafile.currentSpike = -1;
-    rawHandles.datafile.allSpikeCount = -1;
     guidata(rawfig,rawHandles);
-    setSpikeSelectorState(rawHandles,'off');
 end
 
 function dropdownHandler(hObject,~,~)

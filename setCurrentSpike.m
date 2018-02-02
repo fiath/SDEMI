@@ -6,6 +6,9 @@ function setCurrentSpike(fig,spike)
         error('Invalid spike id');
     end
     handles.datafile.currentSpike = spike;
+    file = handles.datafile.eventFiles(handles.datafile.activeEventFile);
+    file.Position = spike;
+    handles.datafile.eventFiles(handles.datafile.activeEventFile) = file;
     updateSpikeSelector(handles);
     guidata(fig,handles);
     set(handles.currentspiketext,'Enable','off');
@@ -29,7 +32,7 @@ function setCurrentSpike(fig,spike)
     delete(handles.datafile.currentSpikeLine);
     handles.datafile.currentSpikeLine = line(handles.axes1,[spikeValue,spikeValue],...
                 [handles.datafile.ylim(1),handles.datafile.ylim(1) + ...
-                (handles.datafile.ylim(2)-handles.datafile.ylim(1))*0.05],...
+                (handles.datafile.ylim(2)-handles.datafile.ylim(1))*0.1],...
                 'Color',[1 0 0],'hittest','off','LineWidth',2);
     guidata(fig,handles);
 end

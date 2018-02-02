@@ -1,11 +1,11 @@
-function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,avgDir,measurementID,splitFiles)
+function MatlabCntAverager(dataFile, eventFileDir, outputDir,updateProgress,numberOfChannels,avgDir,measurementID,splitFiles)
 
     from = -80;
     to = 80;
     range = to-from+1;
     window = [from,to];
 
-    numberOfChannels = 128;
+    %numberOfChannels = 128;
     resolution = 2;
     samplingRate = 20000;
 

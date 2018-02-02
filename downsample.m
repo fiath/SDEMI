@@ -2,7 +2,7 @@ function downsample()
 %TRANSFORMDATA Summary of this function goes here
 %   Detailed explanation goes here
     downfig = matlab.hg.internal.openfigLegacy('downsampler', 'reuse', 'visible');
-    handles = struct('datfilepath','','outfilepath','','processing',0,'stopExecution',0);
+    handles = struct('datfilepath','','outfilepath','','numberOfChannels',128,'processing',0,'stopExecution',0);
     handles.downfig = downfig;
     handles.progressBar = findobj(downfig,'Tag','progressBar');
     handles.progressPerc = findobj(downfig,'Tag','progressPerc');

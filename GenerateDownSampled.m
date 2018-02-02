@@ -1,16 +1,16 @@
-function GenerateDownSampled(res,filepath,outfilepath,updateProgress)
+function GenerateDownSampled(res,filepath,outfilepath,updateProgress,noc)
 %TESTDOWNSAMPLING Summary of this function goes here
 %   Detailed explanation goes here
     file = dir(filepath);
     
-    file_length = file.bytes/128/2;
-    file = memmapfile(filepath, 'Format',{'int16', [128 file_length], 'x'});
+    file_length = file.bytes/noc/2;
+    file = memmapfile(filepath, 'Format',{'int16', [noc file_length], 'x'});
 
     chunkSize = 100000;
     if mod(chunkSize,res)
         error('chunkSize must be a multiple of res');
     end
-    buffer = zeros(128, 2*ceil(file_length/res));
+    buffer = zeros(noc, 2*ceil(file_length/res));
     prev_chunkEnd = 0;
     currMill = 0;
     processedChunks = 0;

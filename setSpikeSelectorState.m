@@ -9,7 +9,6 @@ function setSpikeSelectorState(handles,state)
         set(handles.leftspike,'Enable','off');
         set(handles.currentspiketext,'Enable','off');
         set(handles.rightspike,'Enable','off');
-        updateSpikeSelector(handles);
     end
         
 

@@ -18,7 +18,8 @@ function runButtonClickHandler(hObject,~,~)
     guidata(hObject,handles);
     try
         MatlabCntAverager(handles.datfilepath,[handles.eventdirpath,'/'],[handles.outdirpath,'/'],...
-            @(mill,txt) updateProgress(handles.transfig,handles.progressBar,handles.progressPerc,mill,txt));
+            @(mill,txt) updateProgress(handles.transfig,handles.progressBar,handles.progressPerc,mill,txt),...
+			handles.numberOfChannels);
     catch
         handles.processing = 0;
         handles.stopExecution = 0;

@@ -2,7 +2,8 @@ function transformData(fig)
 %TRANSFORMDATA Summary of this function goes here
 %   Detailed explanation goes here
     transfig = matlab.hg.internal.openfigLegacy('transform', 'reuse', 'visible');
-    handles = struct('datfilepath','','eventdirpath','','outdirpath','','processing',0,'stopExecution',0);
+    handles = struct('datfilepath','','eventdirpath','','outdirpath','','numberOfChannels',128,...
+		'processing',0,'stopExecution',0);
     handles.transfig = transfig;
     handles.progressBar = findobj(transfig,'Tag','progressBar');
     handles.progressPerc = findobj(transfig,'Tag','progressPerc');
@@ -13,11 +14,13 @@ function transformData(fig)
     handles.datfileSelector = findobj(transfig,'Tag','datfileselector');
     handles.eventdirSelector = findobj(transfig,'Tag','eventdirselector');
     handles.outdirSelector = findobj(transfig,'Tag','outdirselector');
+	handles.nocTxt = findobj(transfig,'Tag','numofchannels');
     
     set(handles.runButton,'Callback',@runButtonClickHandler);
     set(handles.datfileSelector,'Callback',@datfileSelectorClickHandler);
     set(handles.eventdirSelector,'Callback',@eventdirSelectorClickHandler);
     set(handles.outdirSelector,'Callback',@outdirSelectorClickHandler);
+	set(handles.nocTxt,'Callback',@numOfChannelsHandles);
     
     % set up progressbar state
     bg_color = 'w';
@@ -89,4 +92,32 @@ function outdirSelectorClickHandler(hObject,~,~)
     guidata(hObject,handles);
 end
 
+function [handles,success] = changeNumOfChannels(handles,str)
+	regex = '^[ ]*(?<num>[1-9]+[0-9]*)[ ]*$';
+	m = regexp(str,regex,'names');
+	if isempty(m)
+		success = -1;
+		return;
+	else
+		success = 1;
+		handles.numberOfChannels = str2num(m.num);
+	end
+end
+
+function numOfChannelsHandles(obj,edata)
+	handles = guidata(obj);
+    C = get(obj, 'String');
+    fprintf('Range: %s\n',C);
+    [handles,success] = changeNumOfChannels(handles,C);
+    fprintf('Success: %d\n',success);
+	set(obj,'String',handles.numberOfChannels);
+	set(obj, 'Enable', 'off');
+	drawnow;
+	set(obj, 'Enable', 'on');
+    if success ~= 1
+        warning('Invalid channel number');
+	end
+	
+	guidata(obj,handles);
+end
 

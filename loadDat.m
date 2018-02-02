@@ -31,7 +31,7 @@ function loadDat(fig)
     end
     datafile.channelIds = gobjects(datafile.numberOfChannels,1);
     datafile.activeChannels = ones(1,datafile.numberOfChannels);
-    [datafile,success] = changeActiveChannels(datafile,'65');
+    [datafile,success] = changeActiveChannels(datafile,'32');
     set(handles.edit1,'String',datafile.channelRangeString);
 
     for i=1:datafile.numberOfChannels

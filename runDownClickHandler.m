@@ -17,7 +17,8 @@ function runDownClickHandler(hObject,~,~)
     guidata(hObject,handles);
     try
         GenerateDownSampled(100,handles.datfilepath,handles.outfilepath,...
-            @(mill,txt) updateProgress(handles.downfig,handles.progressBar,handles.progressPerc,mill,txt));
+            @(mill,txt) updateProgress(handles.downfig,handles.progressBar,handles.progressPerc,mill,txt),...
+			handles.numberOfChannels);
     catch
         handles.processing = 0;
         handles.stopExecution = 0;
