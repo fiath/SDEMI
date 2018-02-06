@@ -2,14 +2,15 @@ function saveTraceImage(hObject,~,~)
 %SAVETRACEIMAGE Summary of this function goes here
 %   Detailed explanation goes here
 
-    [file,path] = uiputfile({'*.bmp';'*.png'},'Save as');
-    if ~file
+    [file,path] = uiputfile({'*.emf';'*.bmp';'*.png';'*.jpeg';...
+		'*.pdf';'*.eps';'*.svg'},'Save as');
+	if ~file
         return;
-    end
+	end
     
-    %f = plotTraceAsFig(hObject);
-    handles = guidata(hObject);
-    saveas(handles.figure1,[path,file]);
-    %close(f);
+	handles = guidata(hObject);
+    f = plotTraceAsFig(handles);
+    saveas(f,[path,file]);
+    close(f);
 end
 

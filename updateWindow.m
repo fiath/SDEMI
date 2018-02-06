@@ -138,6 +138,7 @@ function datafile = updateWindow(handles,newWindow,force)
     end
     
     % apply amplitude
+	datafile.bufferAmplitude = datafile.amplitude;
     datafile.buffer = datafile.buffer*datafile.amplitude;
     
     next_active_offset = 1;
