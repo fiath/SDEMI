@@ -26,14 +26,14 @@ function loadSTA(fig)
         startdir = '~';
     else
         startdir = handles.datafile.filedir(1:end-1);
-        startdir = startdir(1:find(startdir=='/',1,'last')-1);
+        startdir = startdir(1:find(startdir==filesep,1,'last')-1);
     end
     dirpath = uigetdir(startdir,'Select the directory containing the .mat files');
     if dirpath == 0
         return;
     end
     
-    dirpath = [dirpath '/'];
+    dirpath = [dirpath filesep];
     dataList = dir([dirpath '*.ev2.mat']);
     if isempty(dataList)
         % directory contains no .mat files.
@@ -257,7 +257,7 @@ function stafigMouseMoveHandler(hObject,eventdata,~)
             rectYmin = YLim(1) + (r+1-y-1)*(YLim(2)-YLim(1))/r;
             rectYmax = rectYmin + (YLim(2)-YLim(1))/r;
             handles.cursorChannelLine = plot(handles.axes1,[rectXmin,rectXmax,rectXmax,rectXmin,rectXmin],...
-                [rectYmin,rectYmin,rectYmax,rectYmax,rectYmin],'b');
+                [rectYmin,rectYmin,rectYmax,rectYmax,rectYmin],'b','Hittest','off');
         end
     end
     set(handles.cursorChannelString,'String',cursorChannelString);

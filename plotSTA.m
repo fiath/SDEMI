@@ -22,7 +22,8 @@ function plotSTA(fig,unit)
             if (i-1)*c + j <= size(data,1)
                 offsetX = (j-1)*rangeX;
                 offsetY = (r-i)*rangeY;
-                plot(ax,offsetX:1:(offsetX+rangeX),data((i-1)*c+j,:) + offsetY + plotZero,'Color','red','LineWidth',1);
+                plot(ax,offsetX:1:(offsetX+rangeX),data((i-1)*c+j,:) + offsetY + plotZero,...
+					'Color','red','LineWidth',1,'Hittest','off');
                 hold(ax,'on');
             end
         end

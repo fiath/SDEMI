@@ -1,7 +1,7 @@
 function calculateFeatures(in,out,features)
 %CALCULATEFEATURES Summary of this function goes here
 %   Detailed explanation goes here
-    in = [in '/'];
+    in = [in filesep];
     matList = dir([in '*.ev2.mat']);
     if isempty(matList)
         % directory contains no .mat files.
@@ -16,7 +16,7 @@ function calculateFeatures(in,out,features)
     % write out header in global file (names of features)
     currDate =  datestr(now,'yyyy_mm_dd_HH_MM_SS');
     sumName = ['summary_' currDate '.txt'];
-    sid = fopen([out '/' sumName],'w');
+    sid = fopen([out filesep sumName],'w');
     fprintf(sid,'Cluster\t');
     for f=1:size(features,1)-1
         fprintf(sid,[features{f,1}, '\t']);
@@ -45,9 +45,9 @@ function calculateFeatures(in,out,features)
     for i = 1:length(matList)
        fprintf(sid,[matList(i).name,'\t']);
        clusterNames{i} = matList(i).name;
-       matList(i).data = load([matList(i).folder '/' matList(i).name]);
+       matList(i).data = load([matList(i).folder filesep matList(i).name]);
        matList(i).data.sta = matList(i).data.meanSpikeWaveformDetrended;
-       fid = fopen([out '/' matList(i).name(1:end-3) 'txt'],'w');
+       fid = fopen([out filesep matList(i).name(1:end-3) 'txt'],'w');
        for f = 1:size(features,1)
            fprintf(fid,[features{f,1}, '\t']);
            if isempty(features{f,2}.args)
@@ -74,15 +74,15 @@ function calculateFeatures(in,out,features)
     
     fclose(sid);
     
-    save([out '/' 'summary_' currDate '.mat'],'clusterNames','featureNames','featureArgs','X');
+    save([out filesep 'summary_' currDate '.mat'],'clusterNames','featureNames','featureArgs','X');
     
     Z = zscore(X);
     
-    save([out '/' 'zscore_summary_' currDate '.mat'],'clusterNames','featureNames','featureArgs','Z');
+    save([out filesep 'zscore_summary_' currDate '.mat'],'clusterNames','featureNames','featureArgs','Z');
     
     
     % save zscore as txt
-    sid = fopen([out '/' 'zscore_summary_' currDate '.txt'],'w');
+    sid = fopen([out filesep 'zscore_summary_' currDate '.txt'],'w');
     
     fprintf(sid,'Cluster\t');
     for f=1:size(features,1)-1

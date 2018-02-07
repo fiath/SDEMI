@@ -34,8 +34,8 @@ function openHeatmapView(rawfig)
     end
     
     % load ldr files
-    handles.ldr_csd = loadLDR('./CSD32x3.ldr');
-    handles.ldr_hamming = loadLDR('./csdh30.ldr');
+    handles.ldr_csd = loadLDR(['.' filesep 'CSD32x3.ldr']);
+    handles.ldr_hamming = loadLDR(['.' filesep 'csdh30.ldr']);
     handles.ldr_composite = handles.ldr_hamming*handles.ldr_csd;
     
     %set(handles.csd.rangeButton,'Enable','off');

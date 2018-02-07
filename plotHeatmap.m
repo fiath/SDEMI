@@ -48,7 +48,8 @@ function updateLinePosition(fig)
     for i=1:size(handles.lines,2)
         delete(handles.lines(i));
         Xpos  = (i-1)*(size(handles.data,2)-1) + (handles.position-1);
-        handles.lines(i) = line(handles.axes1,[Xpos,Xpos],get(handles.axes1,'YLim'),'Color','black');
+        handles.lines(i) = line(handles.axes1,[Xpos,Xpos],get(handles.axes1,'YLim'),...
+			'Color','black','Hittest','off');
     end
     guidata(fig,handles);
 end

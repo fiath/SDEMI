@@ -7,13 +7,13 @@ function openClusterView(rawfig)
     end
     
     startdir = rawHandles.datafile.filedir(1:end-1);
-    startdir = startdir(1:find(startdir=='/',1,'last')-1);
+    startdir = startdir(1:find(startdir==filesep,1,'last')-1);
     dirpath = uigetdir(startdir,'Select the directory containing the .ev2 files or .ev2.mat files');
     if dirpath == 0
         return;
     end
     
-    dirpath = [dirpath '/'];
+    dirpath = [dirpath filesep];
     dataList = dir([dirpath '*.ev2']);
     if isempty(dataList)
         % directory contains no .ev2 files.

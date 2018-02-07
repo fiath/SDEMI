@@ -16,7 +16,7 @@ function f = plotTraceAsFig(handles)
     tr_pos = get(handles.figure1,'Position');
     set(f,'Position',[fig_pos(1:2),ax_pos(3:4).*tr_pos(3:4)./axes_size]);
 	fig_pos = f.Position;
-    ax = axes(f,'Position',[global_margin(4) global_margin(3),axes_size]);
+    ax = axes(f,'Position',[global_margin(4) global_margin(3),axes_size],'Color','none','Units','normalized');
     set(ax,'YLim',datafile.ylim);
     set(ax,'XLim',[datafile.dataWindow(1)/datafile.samplingRate,datafile.dataWindow(2)/datafile.samplingRate]);
     axis(ax,'off');
@@ -53,12 +53,12 @@ function f = plotTraceAsFig(handles)
 		label.Position = newPos;
 	end
 	
-	scale = axes(f,'Color','none','YAxisLocation','right');
+	scale = axes(f,'Color','none','YAxisLocation','right','Units','normalized');
 	width = 0.2;
 	height = 0.2;
 	scale.Position = [ax.Position(1)+ax.Position(3)-width,ax.Position(2),width,height];
 	xscale = (ax.XLim(2)-ax.XLim(1))/ax.Position(3)*width;
-	if xscale < 1
+	if true
 		xscale = xscale*1000;
 		xlabel(scale,'ms');
 	else
@@ -66,7 +66,7 @@ function f = plotTraceAsFig(handles)
 	end
 	scale.XLim = [0,xscale];
 	yscale = (ax.YLim(2)-ax.YLim(1))/ax.Position(4)*height/datafile.amplitude;
-	ylabel(scale,'uV');
+	ylabel(scale,'\muV');
 	scale.YLim = [0,yscale];
 
 end
