@@ -30,7 +30,11 @@ function openSpikeModal(rawfig,~,~)
             
     tEventFiles = {};
     for i=1:length(eventFiles)
-        reg = regexp(eventFiles{i},['.*' filesep '(?<filename>[^' filesep ']*)$'],'names');
+		if filesep == '\'
+			reg = regexp(eventFiles{i},'.*\\(?<filename>[^\\]*)$','names');
+		else
+			reg = regexp(eventFiles{i},['.*' filesep '(?<filename>[^' filesep ']*)$'],'names');
+		end
         tEventFiles{i} = reg.filename;
     end
     set(handles.activedd,'String',tEventFiles);
