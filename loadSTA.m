@@ -75,6 +75,7 @@ function loadSTA(fig)
     handles.axes1 = findobj(stafig,'Tag','axes1');
     handles.heatmap = findobj(stafig,'Tag','axes2');
     handles.heatmapOriginalPosition = get(handles.heatmap,'Position');
+	handles.createVideo = findobj(stafig,'Tag','createvideo');
     handles.globalSave = findobj(stafig,'Tag','save');
     handles.totalDP = findobj(stafig,'Tag','totaldatapoints');
     handles.currDP = findobj(stafig,'Tag','currentdatapoint');
@@ -96,6 +97,7 @@ function loadSTA(fig)
     handles.heatmapRangeManual = findobj(stafig,'Tag','heatmaprangemanual');
     handles.heatmapRangePanel = findobj(stafig,'Tag','heatmaprangepanel');
     
+	set(handles.createVideo,'Callback',@createVideo);
     set(handles.currDP,'Callback',@currDPHandler);
     set(handles.globalSave,'Callback',@saveFigure);
     set(handles.heatmapRangeManual,'Callback',@heatmapRangeHandler);

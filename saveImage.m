@@ -1,7 +1,8 @@
 function saveImage(hObject,~,~)
 %SAVEASBMP Summary of this function goes here
 %   Detailed explanation goes here
-    [file,path] = uiputfile({'*.bmp';'*.png'},'Save as');
+    [file,path] = uiputfile({'*.emf';'*.bmp';'*.png';'*.jpeg';...
+		'*.pdf';'*.eps';'*.svg'},'Save as');
     if ~file
         return;
     end
@@ -12,12 +13,12 @@ function saveImage(hObject,~,~)
     
     f = plotHeatmapAsFig(hObject);
     saveas(f,[path,file]);
-    ext_index = find(file=='.',1,'last');
-    if isempty(ext_index)
-        ext_index = length(file)+1;
-    end
-    file = [file(1:ext_index-1),'.emf'];
-    saveas(f,[path,file]);
+%     ext_index = find(file=='.',1,'last');
+%     if isempty(ext_index)
+%         ext_index = length(file)+1;
+%     end
+%     file = [file(1:ext_index-1),'.emf'];
+%     saveas(f,[path,file]);
     close(f);
 end
 

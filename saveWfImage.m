@@ -1,7 +1,8 @@
 function saveWfImage(hObject,~,~)
 %SAVEWFIMAGE Summary of this function goes here
 %   Detailed explanation goes here
-    [file,path] = uiputfile({'*.emf'},'Save as');
+    [file,path] = uiputfile({'*.emf';'*.bmp';'*.png';'*.jpeg';...
+		'*.pdf';'*.eps';'*.svg'},'Save as');
     if ~file
         return;
     end
