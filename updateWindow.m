@@ -86,53 +86,74 @@ function datafile = updateWindow(handles,newWindow,force)
     % no filtering on downsampled file!!!
     if datafile.filter.on && datafile.usingDownsampled
         error('Cannot use filtering while using downsampled  data!');
-    end
+	end
     
+	rawHandles = guidata(datafile.fig);
     if datafile.usingDownsampled
-        datafile.lfpBuffer = 0.195*double(datafile.downsampled.data(:,beginBuffer+1:endBuffer));
-        datafile.csdBuffer = [];
-        datafile.muaBuffer = [];
-    else
-        datafile.lfpBuffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
-        rawHandles = guidata(datafile.fig);
-        if isgraphics(rawHandles.hmfig)
+		if isgraphics(rawHandles.hmfig)
+			datafile.lfpBuffer = 0.195*double(datafile.downsampled.data(:,beginBuffer+1:endBuffer));
+			datafile.csdBuffer = [];
+			datafile.muaBuffer = [];
+		end
+	else
+		if isgraphics(rawHandles.hmfig)
+			datafile.lfpBuffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
             heatmapHandles = guidata(rawHandles.hmfig);
 			datafile.csdBuffer = [];
 			% temporarily disable CSD as we do not know the structure of an
 			% electrode
             %datafile.csdBuffer = heatmapHandles.ldr_composite*datafile.lfpBuffer(1:4:128,:);
+			datafile.muaBuffer = abs(filterBuffer(datafile,datafile.lfpBuffer));
         else
             datafile.csdBuffer = [];
-        end
-        datafile.muaBuffer = abs(filterBuffer(datafile,datafile.lfpBuffer));
-    end
-    
-    if datafile.filter.on
-        datafile.buffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
-        
-        datafile.buffer = filterBuffer(datafile,datafile.buffer);
-    elseif datafile.usingDownsampled
-        datafile.buffer = datafile.downsampled.data(:,beginBuffer+1:endBuffer);
-    else
-        datafile.buffer = datafile.file.Data.x(:,beginBuffer+1:endBuffer);
-    end
-    % get size of ax in pixels
+		end
+	end
+	
+	% get size of ax in pixels
     fig = get(ax,'Parent');
     figPos = get(fig,'Position');
     axPos = get(ax,'Position');
     xSize = axPos(3)*figPos(3); % size of axes in pixels
     dataPerPixel = floor((newWindow(2)-newWindow(1)+1)/xSize);
     fprintf('DataPerPixel: %d\n',dataPerPixel);
+	scaled = false;
+	usingParallelDownsampled = false;
+    
+    if datafile.filter.on
+        datafile.buffer = 0.195*double(datafile.file.Data.x(:,beginBuffer+1:endBuffer));
+        
+        datafile.buffer = filterBuffer(datafile,datafile.buffer);
+		scaled =  true;
+    elseif datafile.usingDownsampled
+        datafile.buffer = datafile.downsampled.data(:,beginBuffer+1:endBuffer);
+	elseif ~isgraphics(rawHandles.hmfig) && isRegionAvailableAt(datafile,beginBuffer+1,endBuffer,dataPerPixel)
+        ds = datafile.preprocessed('downsampled');
+		last = ceil(endBuffer/datafile.preprocessed('resolution')*2);
+		first = ceil((beginBuffer+1)/datafile.preprocessed('resolution')*2);
+		fprintf('Using parallel [%d,%d] from [%d]\n',first,last,size(ds,2));
+		datafile.buffer = ds(:,first:last);
+		scaled = true;
+		usingParallelDownsampled = true;
+	else
+		datafile.buffer = datafile.file.Data.x(:,beginBuffer+1:endBuffer);
+	end
     %dataPerPixel = 0;
     datafile.dataResolution = dataPerPixel;
-    if dataPerPixel > 8
-        datafile.buffer = downSampleBuffer(datafile,datafile.buffer);
-        datafile.lfpBuffer = downSampleBuffer(datafile,datafile.lfpBuffer);
-        datafile.csdBuffer = downSampleBuffer(datafile,datafile.csdBuffer);
-        datafile.muaBuffer = downSampleBufferWithAvg(datafile,datafile.muaBuffer);
-    end
+    if dataPerPixel > 8 && isgraphics(rawHandles.hmfig)
+			datafile.lfpBuffer = downSampleBuffer(datafile,datafile.lfpBuffer);
+			datafile.csdBuffer = downSampleBuffer(datafile,datafile.csdBuffer);
+			datafile.muaBuffer = downSampleBufferWithAvg(datafile,datafile.muaBuffer);
+	end
+	if usingParallelDownsampled
+		dataPerPixel = floor(size(datafile.buffer,2)/xSize);
+	end
+	
+	if dataPerPixel > 8
+		datafile.buffer = downSampleBuffer(datafile,datafile.buffer,dataPerPixel);
+	end
+
     
-    if ~datafile.filter.on
+    if ~scaled
         % it hasnt been scaled yet
         datafile.buffer = 0.195*double(datafile.buffer);
     end
@@ -193,9 +214,11 @@ function datafile = updateWindow(handles,newWindow,force)
     datafile.bufferEnd = endBuffer;
     
     % calculate abs max values
-    datafile.lfpAbsMaxValue = max(max(abs(datafile.lfpBuffer)));
-    datafile.csdAbsMaxValue = max([max(max(abs(datafile.csdBuffer))),0]);
-    datafile.muaAbsMaxValue = max([max(max(datafile.muaBuffer)),0]);
+	if isgraphics(rawHandles.hmfig)
+		datafile.lfpAbsMaxValue = max(max(abs(datafile.lfpBuffer)));
+		datafile.csdAbsMaxValue = max([max(max(abs(datafile.csdBuffer))),0]);
+		datafile.muaAbsMaxValue = max([max(max(datafile.muaBuffer)),0]);
+	end
     
     % update spikeLines
     datafile = updateSpikes(datafile,1);

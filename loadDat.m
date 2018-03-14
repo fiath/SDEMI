@@ -2,6 +2,8 @@ function loadDat(fig)
 %LOADDAT Summary of this function goes here
 %   Detailed explanation goes here
 
+	enable_parallel_prefetch = false;
+
     [filename,path] = uigetfile('*.dat','Select .dat file','/home/debreceni/Projects/MScOnlab/Adam/Data/Matlab/dat/');
     if filename == 0
         return;
@@ -56,6 +58,20 @@ function loadDat(fig)
     end
     
     handles.datafile = datafile;
+	% setup timer to downsample raw file
+	handles.timer = timer(...
+		'ExecutionMode', 'fixedRate', ...       % Run timer repeatedly.
+		'Period', 1, ...                        % Initial period is 1 sec.
+		'TimerFcn', {@parallelPrefetch,fig}); % Specify callback function.
+	
+	% setup parallel pool
+	parInputFile = 0;
+	if enable_parallel_prefetch
+		parInputFile = parallel.pool.Constant(@() fopen(filepath,'r'),@fclose);
+	end
+	handles.datafile.preprocessed('inputFile') = parInputFile;
+	handles.datafile.preprocessed('downsampled') = [];
+	handles.datafile.preprocessed('resolution') = 50;
     
     ax = handles.axes1;
     set(ax,'YLim',handles.datafile.ylim);
@@ -63,12 +79,16 @@ function loadDat(fig)
     handles.datafile = updateWindow(handles,[0,100000-1]);
     updateIdPositions(handles);
     handles.datLoaded = 1;
-    
+	
     guidata(fig,handles);
     
     showAllChildren(fig);
     set(handles.clusterview,'Enable','on');
     set(handles.heatmapView,'Enable','on');
     set(handles.traceview,'Enable','off');
+	
+	if enable_parallel_prefetch
+		start(handles.timer);
+	end
 end
 

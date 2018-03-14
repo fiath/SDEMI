@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 02-Feb-2018 12:00:49
+% Last Modified by GUIDE v2.5 14-Mar-2018 11:02:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -82,6 +82,7 @@ handles.eventlisteditor = gobjects;
 
 handles.datafile = struct( 'fig',handles.figure1,... 
                     'ax',handles.axes1,...
+					'preprocessed',containers.Map,...
                     'downsampled',[],...
                     'usingDownsampled',0,...
                     'numberOfChannels',varargin{1},...
@@ -247,6 +248,9 @@ function mousemoveHandler(hObject, eventdata, handles)
 
 function closeHandler(hObject,eventdata)
     handles = guidata(hObject);
+	if isfield(handles,'timer')
+		stop(handles.timer);
+	end
     if isgraphics(handles.stafig)
         close(handles.stafig);
     end
@@ -586,3 +590,12 @@ function statistics_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     handles = guidata(hObject);
     statView(handles.figure1);
+
+
+% --------------------------------------------------------------------
+function statisticsview_Callback(hObject, eventdata, handles)
+% hObject    handle to statisticsview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+	handles = guidata(hObject);
+	stat3DView(handles.figure1);
