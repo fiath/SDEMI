@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 14-Mar-2018 11:02:57
+% Last Modified by GUIDE v2.5 17-Mar-2018 20:04:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -599,3 +599,11 @@ function statisticsview_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 	handles = guidata(hObject);
 	stat3DView(handles.figure1);
+
+
+% --------------------------------------------------------------------
+function Untitled_1_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+	openHierView();
