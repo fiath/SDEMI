@@ -12,6 +12,8 @@ function stat3DView(rawfig)
 						'y', -1,...
 						'z', -1);
 					
+	ctrl_down = false;
+					
 	feature_list = {};
 
     % Set up graphics
@@ -26,11 +28,21 @@ function stat3DView(rawfig)
 	handles.x_popup = findobj(fig,'Tag','x_popup');
 	handles.y_popup = findobj(fig,'Tag','y_popup');
 	handles.z_popup = findobj(fig,'Tag','z_popup');
+	handles.mode_switch = findobj(fig,'Tag','mode_switch');
+	handles.mode_switch.String = 'Rotate';
+	set(handles.mode_switch, 'Callback',@(a,b,c)keyupHandler(a,struct('Key','x'),b));
 	set(findobj(fig,'Tag','update_button'), 'Callback',@update);
 	set(handles.open,'Callback',@openHandler);
     h = rotate3d(handles.axes);
-    h.Enable = 'on';
+    h.Enable = 'off';
     h.RotateStyle = 'orbit';
+	
+	d = datacursormode(fig);
+	d.Enable = 'on';
+	d.DisplayStyle = 'datatip';
+	d.UpdateFcn = @updateCursor;
+	
+	restoreKeyPress();
     
     orientations = {'default','xy','xz','yz'};
     for i=1:length(orientations)
@@ -177,6 +189,8 @@ function stat3DView(rawfig)
 			return
 		end
 		
+		fig.Name = [path, filename];
+		
 		handles.x_popup.String = feature_list;
 		handles.y_popup.String = feature_list;
 		handles.z_popup.String = feature_list;
@@ -209,20 +223,68 @@ function stat3DView(rawfig)
 		[az,el] = view(handles.axes);
 		cla(handles.axes);
 		if handles.values_radio.Value == 1
+			axis_type = 'value';
 			% display values
 			scatter3(handles.axes,handles.rawdata.X(:, handles.x_popup.Value),...
 				handles.rawdata.X(:, handles.y_popup.Value),handles.rawdata.X(:, handles.z_popup.Value))
 		elseif handles.zscores_radio.Value == 1
+			axis_type = 'zscore';
 			% display values
 			scatter3(handles.axes,handles.zscoredata.Z(:, handles.x_popup.Value),...
 				handles.zscoredata.Z(:, handles.y_popup.Value),handles.zscoredata.Z(:, handles.z_popup.Value))
 		end
-		xlabel(handles.axes, ['(x) ', feature_list{handles.x_popup.Value}]);
-		ylabel(handles.axes, ['(y) ', feature_list{handles.y_popup.Value}]);
-		zlabel(handles.axes, ['(z) ', feature_list{handles.z_popup.Value}]);
+		xlabel(handles.axes, ['(x) ', feature_list{handles.x_popup.Value},' ', axis_type]);
+		ylabel(handles.axes, ['(y) ', feature_list{handles.y_popup.Value},' ', axis_type]);
+		zlabel(handles.axes, ['(z) ', feature_list{handles.z_popup.Value},' ', axis_type]);
 		updateAxii();
 		view(handles.axes, [az,el]);
 	end
 
+	function keyupHandler(obj,eventdata,~)
+		fprintf('Button up %s\n',eventdata.Key);
+		if strcmp(eventdata.Key,'x') && ctrl_down
+			fprintf('Ctrl up\n');
+			ctrl_down = false;
+			d.Enable = 'on';
+			h.Enable = 'off';
+			handles.mode_switch.String = 'Rotate';
+		elseif strcmp(eventdata.Key,'x') && ~ctrl_down
+			fprintf('Ctrl down\n');
+			ctrl_down = true;
+			d.Enable = 'off';
+			h.Enable = 'on';
+			handles.mode_switch.String = 'Datacursor';
+		end
+		restoreKeyPress();
+	end
+
+	function restoreKeyPress()
+		% WARNING!! this is undocumented, otherwise interactive mode captures
+		% keypresses
+		hManager = uigetmodemanager(fig);
+		try
+			set(hManager.WindowListenerHandles, 'Enable', 'off');  % HG1
+		catch
+			[hManager.WindowListenerHandles.Enabled] = deal(false);  % HG2
+		end
+		set(fig, 'WindowKeyPressFcn', []);
+		set(fig, 'KeyPressFcn', @keyupHandler);
+	end
+
+	function out_txt = updateCursor(~,event)
+		out_txt = ['(X: ',num2str(event.Position(1)),' Y: ',num2str(event.Position(2)),' Z: ', num2str(event.Position(3)),') '];
+		handles = guidata(fig);
+		if handles.values_radio.Value == 1
+			[~,m] = min(sum(([handles.rawdata.X(:,handles.x_popup.Value);...
+				handles.rawdata.X(:,handles.y_popup.Value);...
+				handles.rawdata.X(:,handles.z_popup.Value)]  - event.Position).^2,2));
+			out_txt = [out_txt, handles.rawdata.clusterNames{m}];
+		elseif handles.zscores_radio.Value == 1
+			[~,m] = min(sum(([handles.zscoredata.Z(:,handles.x_popup.Value);...
+				handles.zscoredata.Z(:,handles.y_popup.Value);...
+				handles.zscoredata.Z(:,handles.z_popup.Value)]- event.Position).^2,2));
+			out_txt = [out_txt, handles.zscoredata.clusterNames{m}];
+		end
+	end
 end
 
