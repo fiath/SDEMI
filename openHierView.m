@@ -11,15 +11,18 @@ function openHierView()
 				'method', findobj(modal, 'Tag', 'method_popup'),...
 				'input_text',findobj(modal, 'Tag', 'input_text'),...
 				'output_text',findobj(modal, 'Tag', 'output_text'));
-			
-	set(handles.method, 'Callback', @popupChange);
+	
+	set(handles.metric, 'Callback', @metricChange);
+	set(handles.method, 'Callback', @methodChange);
 	handles.fig.Name = 'Hierarchical clustering';
+	
+	handles.metric_strings = {'euclidean','squaredeuclidean',...
+		'seuclidean','mahalanobis','cityblock','minkowski','chebychev',...
+		'cosine','correlation','hamming','jaccard','spearman'};
             
 	handles.method.String = {'average','centroid','complete','median',...
 		'single','ward','weighted'};
-	handles.metric.String = {'euclidean','squaredeuclidean',...
-		'seclidean','mahalanobis','cityblock','minkowski','chebychev',...
-		'cosine','correlation','hamming','jaccard','spearman'};
+	handles.metric.String = handles.metric_strings;
     set(findobj(modal,'Tag','input_button'),'Callback',@inputSelect);
 	set(findobj(modal,'Tag','output_button'),'Callback',@outputSelect);
 	
@@ -34,9 +37,30 @@ function openHierView()
     guidata(modal,handles);
 end
 
-function popupChange(obj,~,~)
+function metricChange(obj,~,~)
 	handles = guidata(obj);
 	handles.fig.Name = 'Hierarchical clustering';
+end
+
+function methodChange(obj,~,~)
+	handles = guidata(obj);
+	handles.fig.Name = 'Hierarchical clustering';
+	
+	active_method = handles.method.String{handles.method.Value};
+	active_metric = handles.metric.String{handles.metric.Value};
+	
+	if any(strcmp(active_method,{'centroid','median','ward'}))
+		handles.metric.String = {'euclidean','minkowski'};
+		if strcmp(active_metric,'minkowski')
+			handles.metric.Value = 2;
+		else
+			handles.metric.Value = 1;
+		end
+	else
+		handles.metric.String = handles.metric_strings;
+		index = find(strcmp(active_metric,handles.metric_strings),1);
+		handles.metric.Value = index;
+	end
 end
 
 function inputSelect(obj,~,~)
@@ -145,11 +169,19 @@ function calcCallback(obj,~,~)
 		end
 	end
 	fprintf('Calculating for features [%s]\n',num2str(active_features));
-	output = linkage(handles.data.Z(:,active_features), ...
-		handles.method.String{handles.method.Value}, handles.metric.String{handles.metric.Value});
+	method = handles.method.String{handles.method.Value};
+	metric = handles.metric.String{handles.metric.Value};
+	output = linkage(handles.data.Z(:,active_features), method, metric);
+	[warnMsg, warnId] = lastwarn;
 	input = handles.data;
-	save(handles.output_text.String,'input','active_features','output');
-	handles.fig.Name = 'Hierarchical clustering (Done)';
+	save(handles.output_text.String,'input','active_features','output','metric','method');
+	if ~isempty(warnMsg) && strcmp(warnId,'stats:linkage:NonMonotonicTree')
+        handles.fig.Name = 'Hierarchical clustering (Done) [NonMonotonicTree]';
+		warning('','');
+	else
+		handles.fig.Name = 'Hierarchical clustering (Done)';
+	end
+	
 end
 
 function movefunc(obj,edata)
