@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 17-Mar-2018 20:04:48
+% Last Modified by GUIDE v2.5 29-Mar-2018 15:01:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -606,4 +606,18 @@ function Untitled_1_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function hiermenu_Callback(hObject, eventdata, handles)
+% hObject    handle to hiermenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 	openHierView();
+
+% --------------------------------------------------------------------
+function kmeansmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to kmeansmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+	openKmeansView();
