@@ -10,7 +10,7 @@ function f = plotTraceAsFig(handles)
     axes_inner_width = 1 -axes_margin(2)-axes_margin(4);
     axes_inner_height = 1 -axes_margin(1)-axes_margin(3);
 
-    f = figure('Toolbar','None','Menubar','None','Units','pixels');
+    f = figure('Toolbar','None','Menubar','None','Units','pixels','Renderer','Painters');
     fig_pos = get(f,'Position');
     ax_pos = get(handles.axes1,'Position');
     tr_pos = get(handles.figure1,'Position');
