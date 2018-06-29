@@ -1,7 +1,7 @@
 function [start_channel, start_pos, channel, pos] = calcPropagation( data, threshold )
 %CALCPROPAGATION Summary of this function goes here
 %   Detailed explanation goes here
-%	threhsold is from 0% to 100%
+%	threshold is from 0% to 100%
 
 	[start_amplitude,start_channel, start_pos] = calcMinPosition(data.sta);
 	pos = start_pos;
